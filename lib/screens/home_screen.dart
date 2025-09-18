@@ -1,3 +1,5 @@
+// lib/screens/home_screen.dart
+
 import 'package:amritdhara/screens/user_input_screen.dart';
 import 'package:flutter/material.dart';
 import 'report_screen.dart';
@@ -6,23 +8,61 @@ import 'chat_screen.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
+  String getGreeting() {
+    final hour = TimeOfDay.now().hour;
+    if (hour < 12) {
+      return 'Good Morning,';
+    } else if (hour < 17) {
+      return 'Good Afternoon,';
+    } else {
+      return 'Good Evening,';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = (screenWidth - (16 * 2) - 16) / 2;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Color(0xFF012A4A)),
-          onPressed: () {},
+        leadingWidth: 80,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.7),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                )
+              ],
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.menu, color: Color(0xFF012A4A)),
+              onPressed: () {},
+            ),
+          ),
         ),
-        title: const Text(
+        title: Text(
           'AMRITDHARA',
           style: TextStyle(
-            color: Color(0xFF012A4A),
-            fontWeight: FontWeight.bold,
+            color: const Color(0xFF012A4A),
+            fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
+            fontSize: 26,
+            shadows: [
+              Shadow(
+                blurRadius: 8.0,
+                color: Colors.black.withOpacity(0.4),
+                offset: const Offset(2.0, 2.0),
+              ),
+            ],
           ),
         ),
         centerTitle: false,
@@ -30,19 +70,14 @@ class HomePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: GestureDetector(
-              onTap: () {
-                // Handle profile icon tap
-              },
+              onTap: () {},
               child: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.blue.withOpacity(0.15),
                 ),
-                child: const Icon(
-                  Icons.person,
-                  color: Color(0xFF012A4A),
-                ),
+                child: const Icon(Icons.person, color: Color(0xFF012A4A)),
               ),
             ),
           ),
@@ -70,112 +105,73 @@ class HomePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: kToolbarHeight + MediaQuery.of(context).padding.top + 10),
-                const Text(
-                  'Good Morning,',
-                  style: TextStyle(
-                    fontSize: 22,
-                    color: Colors.black54,
-                  ),
-                ),
-                const Text(
-                  'John',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF012A4A),
-                  ),
-                ),
+                Text(getGreeting(), style: const TextStyle(fontSize: 22, color: Colors.black54)),
+                const Text('John', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF012A4A))),
                 const SizedBox(height: 20),
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(25.0),
-                    border: Border.all(
-                      color: const Color(0xFF012A4A),
-                      width: 3,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        spreadRadius: 3,
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
+                    border: Border.all(color: const Color(0xFF012A4A), width: 3),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), spreadRadius: 3, blurRadius: 15, offset: const Offset(0, 8))],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(22.0),
-                    child: Image.asset(
-                      'assets/images/map.png',
-                      fit: BoxFit.cover,
-                      height: 180,
-                      width: double.infinity,
-                    ),
+                    child: Image.asset('assets/images/map.png', fit: BoxFit.cover, height: 180, width: double.infinity),
                   ),
                 ),
                 const SizedBox(height: 30),
+                _buildTipCard(),
+                const SizedBox(height: 30),
                 Row(
                   children: [
-                    Container(
-                      width: 5,
-                      height: 28,
-                      color: const Color(0xFF012A4A),
-                    ),
+                    Container(width: 5, height: 28, color: const Color(0xFF012A4A)),
                     const SizedBox(width: 10),
-                    const Text(
-                      'QUICK ACCESS',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
+                    const Text('QUICK ACCESS', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
                   ],
                 ),
                 const SizedBox(height: 20),
-                Wrap(
-                  spacing: 16.0,
-                  runSpacing: 16.0,
+                Column(
                   children: [
-                    // --- UPDATED: Added onTap for navigation ---
-                    _QuickAccessCard(
-                      text: 'USER INPUT',
-                      icon: Icons.assignment_outlined,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF4CAF50), Color(0xFFC8E6C9)],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                      textColor: const Color(0xFF1B5E20),
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const UserInputScreen()));
-                      },
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _QuickAccessCard(
+                          text: 'USER INPUT',
+                          icon: Icons.assignment_outlined,
+                          gradient: const LinearGradient(colors: [Color(0xFF4CAF50), Color(0xFFC8E6C9)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                          textColor: const Color(0xFF1B5E20),
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const UserInputScreen()));
+                          },
+                        ),
+                        _QuickAccessCard(
+                          text: 'SUBSIDY',
+                          icon: Icons.currency_rupee_outlined,
+                          gradient: const LinearGradient(colors: [Color(0xFF4FC3F7), Color(0xFFE1F5FE)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                          textColor: const Color(0xFF01579B),
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportScreen()));
+                          },
+                        ),
+                      ],
                     ),
-                    _QuickAccessCard(
-                      text: 'SUBSIDY',
-                      icon: Icons.currency_rupee_outlined,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF4FC3F7), Color(0xFFE1F5FE)],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                      textColor: const Color(0xFF01579B),
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportScreen()));
-                      },
-                    ),
-                    _QuickAccessCard(
-                      text: 'CHAT BOT',
-                      icon: Icons.chat_bubble_outline,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFE91E63), Color(0xFFF8BBD0)],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                      textColor: const Color(0xFF880E4F),
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatScreen()));
-                      },
+                    // --- CHANGED: Reduced spacing between rows ---
+                    const SizedBox(height: 12.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _QuickAccessCard(
+                          text: 'CHAT BOT',
+                          icon: Icons.chat_bubble_outline,
+                          gradient: const LinearGradient(colors: [Color(0xFFE91E63), Color(0xFFF8BBD0)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                          textColor: const Color(0xFF880E4F),
+                          width: cardWidth * 0.8,
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatScreen()));
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -187,6 +183,44 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildTipCard() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.amber.shade200, Colors.orange.shade200],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.orange.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.lightbulb_outline, color: Colors.orange.shade800, size: 40),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Tip of the Day', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.orange.shade900)),
+                const SizedBox(height: 4),
+                Text('Check your home for leaks. Even a small drip can waste thousands of litres a year!', style: TextStyle(fontSize: 14, color: Colors.brown.shade800)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _QuickAccessCard extends StatelessWidget {
@@ -194,24 +228,28 @@ class _QuickAccessCard extends StatelessWidget {
   final IconData icon;
   final Gradient gradient;
   final Color textColor;
-  final VoidCallback onTap; // --- NEW: Added onTap function property
+  final VoidCallback onTap;
+  final double? width;
 
   const _QuickAccessCard({
     required this.text,
     required this.icon,
     required this.gradient,
     required this.textColor,
-    required this.onTap, // --- NEW: Required in constructor
+    required this.onTap,
+    this.width,
   });
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final cardWidth = (screenWidth - (16 * 3)) / 2;
+    final defaultCardWidth = (screenWidth - (16 * 2) - 16) / 2;
+    final actualWidth = width ?? defaultCardWidth;
 
     return Container(
-      width: cardWidth,
-      height: cardWidth * 0.9,
+      width: actualWidth,
+      // --- CHANGED: Made the cards shorter ---
+      height: actualWidth * 0.85, // Was 0.9
       decoration: BoxDecoration(
         gradient: gradient,
         borderRadius: BorderRadius.circular(40.0),
@@ -239,7 +277,7 @@ class _QuickAccessCard extends StatelessWidget {
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 20,
                 ),
               ),
             ],

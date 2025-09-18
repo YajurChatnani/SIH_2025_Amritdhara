@@ -1,5 +1,8 @@
 // lib/screens/user_input_screen.dart
 import 'package:flutter/material.dart';
+import 'dart:ui'; // Needed for the blur effect
+import 'package:flutter/services.dart'; // Needed for Haptic Feedback
+import 'package:google_fonts/google_fonts.dart';
 
 class UserInputScreen extends StatefulWidget {
   const UserInputScreen({super.key});
@@ -14,7 +17,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
   final _roofAreaController = TextEditingController();
 
   String? _roofMaterial = 'Concrete';
-  String? _locationType = 'Urban';
+  String _locationType = 'Urban';
 
   @override
   void dispose() {
@@ -26,7 +29,52 @@ class _UserInputScreenState extends State<UserInputScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final innerFieldColor = Colors.blue.shade50.withOpacity(0.7);
+    // A list of all our form sections (widgets)
+    final formSections = [
+      _buildSectionCard(
+        title: 'Location',
+        children: [
+          _BuildTextField('PIN Code', _pinCodeController),
+          const SizedBox(height: 16),
+          _BuildTextField('Address', _addressController),
+          const SizedBox(height: 16),
+          _BuildStyledButton(text: 'Use location', icon: Icons.location_on_outlined, onTap: () {}),
+        ],
+      ),
+      _buildSectionCard(
+        title: 'Roof Details',
+        children: [
+          _BuildTextField('Roof Area', _roofAreaController, suffixText: 'm²'),
+          const SizedBox(height: 16),
+          _GlassmorphicContainer(
+            borderRadius: 15,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _roofMaterial,
+                isExpanded: true,
+                icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF012A4A)),
+                dropdownColor: Colors.blue.shade50.withOpacity(0.9),
+                onChanged: (String? newValue) => setState(() => _roofMaterial = newValue),
+                items: <String>['Concrete', 'Tin', 'Tiles', 'Other']
+                    .map((String value) => DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value, style: const TextStyle(color: Color(0xFF012A4A), fontSize: 16, fontWeight: FontWeight.w500)),
+                ))
+                    .toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+      _buildSectionCard(
+        title: 'Location Type',
+        children: [
+          _buildToggleButtons(),
+        ],
+      ),
+      Center(child: _BuildStyledButton(text: 'SUBMIT', isSubmitButton: true, onTap: () {})),
+    ];
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -37,32 +85,39 @@ class _UserInputScreenState extends State<UserInputScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.lightBlue.withOpacity(0.8),
+              color: Colors.white,
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 5,
-                  offset: const Offset(0, 2),
-                )
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)
               ],
             ),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              icon: const Icon(Icons.arrow_back, color: Color(0xFF012A4A)),
               onPressed: () => Navigator.pop(context),
             ),
           ),
         ),
-        title: const Text(
-          'USER INPUT',
-          style: TextStyle(
-            color: Color(0xFF012A4A),
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-            fontSize: 20,
-            decoration: TextDecoration.underline,
-            decorationColor: Color(0xFF012A4A),
-            decorationThickness: 2,
+        title: Transform(
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.002)
+            ..rotateX(0.1),
+          alignment: FractionalOffset.center,
+          child: ShaderMask(
+            blendMode: BlendMode.srcIn,
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [Color(0xFF42A5F5), Color(0xFF0D47A1)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+            child: Text(
+              'USER INPUT',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.5,
+                fontSize: 24,
+                shadows: [const Shadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 2))],
+              ),
+            ),
           ),
         ),
         centerTitle: true,
@@ -71,246 +126,213 @@ class _UserInputScreenState extends State<UserInputScreen> {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFD4EFFC),
-              Color(0xFFE0F2F7),
-              Colors.white,
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.0, 0.5, 1.0],
-          ),
+          gradient: LinearGradient(colors: [Color(0xFFD4EFFC), Colors.white], begin: Alignment.topCenter, end: Alignment.bottomCenter),
         ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                SizedBox(height: kToolbarHeight + MediaQuery.of(context).padding.top + 10),
-
-                _buildSectionCard(
-                  title: 'Location',
-                  children: [
-                    _buildTextField('PIN Code', _pinCodeController, innerFieldColor),
-                    const SizedBox(height: 16),
-                    _buildTextField('Address', _addressController, innerFieldColor),
-                    const SizedBox(height: 16),
-                    _buildStyledButton(
-                      text: 'Use location',
-                      icon: Icons.location_on_outlined,
-                      color: innerFieldColor,
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                _buildSectionCard(
-                  title: 'Roof Details',
-                  children: [
-                    _buildTextField('Roof Area', _roofAreaController, innerFieldColor, suffixText: 'm²'),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                      decoration: BoxDecoration(
-                        color: innerFieldColor,
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: _roofMaterial,
-                          isExpanded: true,
-                          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-                          dropdownColor: Colors.blue.shade50,
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _roofMaterial = newValue;
-                            });
-                          },
-                          items: <String>['Concrete', 'Tin', 'Tiles', 'Other']
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value, style: const TextStyle(color: Colors.black54, fontSize: 16)),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                _buildSectionCard(
-                  title: 'Location Type',
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: RadioListTile<String>(
-                            title: const Text('Urban'),
-                            value: 'Urban',
-                            groupValue: _locationType,
-                            onChanged: (String? value) {
-                              setState(() {
-                                _locationType = value;
-                              });
-                            },
-                            activeColor: const Color(0xFF42A5F5),
-                          ),
-                        ),
-                        Expanded(
-                          child: RadioListTile<String>(
-                            title: const Text('Rural'),
-                            value: 'Rural',
-                            groupValue: _locationType,
-                            onChanged: (String? value) {
-                              setState(() {
-                                _locationType = value;
-                              });
-                            },
-                            activeColor: const Color(0xFF42A5F5),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-
-                Center(
-                  child: _buildStyledButton(
-                    text: 'SUBMIT',
-                    isSubmitButton: true,
-                    onTap: () {
-                      print('Submit tapped');
-                      print('PIN Code: ${_pinCodeController.text}');
-                      print('Address: ${_addressController.text}');
-                      print('Roof Area: ${_roofAreaController.text}');
-                      print('Roof Material: $_roofMaterial');
-                      print('Location Type: $_locationType');
-                    },
-                  ),
-                ),
-              ],
-            ),
+        child: ListView.builder(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.only(
+            top: kToolbarHeight + MediaQuery.of(context).padding.top + 20,
+            left: 16,
+            right: 16,
+            bottom: 20,
           ),
+          itemCount: formSections.length,
+          itemBuilder: (context, index) {
+            return _AnimatedSection(
+              delay: 150 * (index + 1),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24.0),
+                child: formSections[index],
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
-  // Helper for the outer white cards
+  Widget _buildToggleButtons() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth / 2;
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: Colors.white.withOpacity(0.5)),
+          ),
+          child: Stack(
+            children: [
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+                left: _locationType == 'Urban' ? 0 : width,
+                child: Container(
+                  width: width,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Color(0xFF42A5F5), Color(0xFF1976D2)]),
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 10, spreadRadius: 2)],
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _locationType = 'Urban');
+                      },
+                      child: Container(
+                        height: 50,
+                        color: Colors.transparent,
+                        child: Center(
+                          child: Text('Urban', style: TextStyle(color: _locationType == 'Urban' ? Colors.white : const Color(0xFF012A4A), fontWeight: FontWeight.bold, fontSize: 16)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _locationType = 'Rural');
+                      },
+                      child: Container(
+                        height: 50,
+                        color: Colors.transparent,
+                        child: Center(
+                          child: Text('Rural', style: TextStyle(color: _locationType == 'Rural' ? Colors.white : const Color(0xFF012A4A), fontWeight: FontWeight.bold, fontSize: 16)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildSectionCard({required String title, required List<Widget> children}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
-          child: Text(
-            title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF012A4A)),
-          ),
+          child: Text(title, style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: const Color(0xFF012A4A))),
         ),
         Container(
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(25.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                spreadRadius: 2,
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), spreadRadius: 2, blurRadius: 20, offset: const Offset(0, 5))],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: children,
-          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
         ),
       ],
     );
   }
+}
 
-  // Helper for text fields inside the cards
-  Widget _buildTextField(String hintText, TextEditingController controller, Color backgroundColor, {String? suffixText}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  hintText,
-                  style: const TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-              ),
-              if (suffixText != null) Text(suffixText, style: const TextStyle(fontSize: 16, color: Colors.grey)),
-            ],
+class _GlassmorphicContainer extends StatelessWidget {
+  final Widget child;
+  final double borderRadius;
+  final BoxShape shape;
+  final EdgeInsets? padding;
+
+  const _GlassmorphicContainer({required this.child, this.borderRadius = 25.0, this.shape = BoxShape.rectangle, this.padding});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: shape == BoxShape.circle ? BorderRadius.zero : BorderRadius.circular(borderRadius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            shape: shape,
+            borderRadius: shape == BoxShape.circle ? null : BorderRadius.circular(borderRadius),
+            color: Colors.white.withOpacity(0.4),
+            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
           ),
-          TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-              border: InputBorder.none,
-            ),
-            style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w500),
-            keyboardType: hintText.contains('PIN Code') || hintText.contains('Roof Area') ? TextInputType.number : TextInputType.text,
-          ),
-          DottedLine(color: Colors.grey.shade700),
-        ],
+          child: child,
+        ),
       ),
     );
   }
+}
 
-  // Helper for the "Use Location" and "Submit" buttons
-  Widget _buildStyledButton({required String text, IconData? icon, Color? color, required VoidCallback onTap, bool isSubmitButton = false}) {
-    return Container(
+class _BuildTextField extends StatefulWidget {
+  final String hintText;
+  final TextEditingController controller;
+  final String? suffixText;
+
+  const _BuildTextField(this.hintText, this.controller, {this.suffixText});
+
+  @override
+  State<_BuildTextField> createState() => _BuildTextFieldState();
+}
+
+class _BuildTextFieldState extends State<_BuildTextField> {
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       decoration: BoxDecoration(
-        color: isSubmitButton ? const Color(0xFF64B5F6) : color,
-        borderRadius: BorderRadius.circular(25.0),
-        boxShadow: [
-          if (isSubmitButton)
-            BoxShadow(
-              color: Colors.blue.withOpacity(0.3),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-        ],
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: _focusNode.hasFocus ? Colors.blue.shade300 : Colors.white.withOpacity(0.2),
+          width: 1.5,
+        ),
+        boxShadow: _focusNode.hasFocus
+            ? [BoxShadow(color: Colors.blue.withOpacity(0.2), blurRadius: 8, spreadRadius: 2)]
+            : [],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(25.0),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 14.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            color: Colors.white.withOpacity(0.4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (icon != null) const Icon(Icons.location_on_outlined, color: Colors.black87),
-                if (icon != null) const SizedBox(width: 8),
-                Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: isSubmitButton ? Colors.white : Colors.black87,
-                    fontWeight: isSubmitButton ? FontWeight.bold : FontWeight.w600,
-                  ),
+                Row(
+                  children: [
+                    Expanded(child: Text(widget.hintText, style: GoogleFonts.poppins(color: const Color(0xFF012A4A), fontSize: 16, fontWeight: FontWeight.w600))),
+                    if (widget.suffixText != null) Text(widget.suffixText!, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                  ],
                 ),
+                TextField(
+                  focusNode: _focusNode,
+                  controller: widget.controller,
+                  decoration: const InputDecoration(isDense: true, contentPadding: EdgeInsets.zero, border: InputBorder.none),
+                  style: GoogleFonts.poppins(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w500),
+                  keyboardType: widget.hintText.contains('PIN Code') || widget.hintText.contains('Roof Area') ? TextInputType.number : TextInputType.text,
+                ),
+                DottedLine(color: Colors.black54),
               ],
             ),
           ),
@@ -320,7 +342,106 @@ class _UserInputScreenState extends State<UserInputScreen> {
   }
 }
 
-// Custom painter for the dotted line
+class _BuildStyledButton extends StatefulWidget {
+  final String text;
+  final IconData? icon;
+  final VoidCallback onTap;
+  final bool isSubmitButton;
+
+  const _BuildStyledButton({required this.text, this.icon, required this.onTap, this.isSubmitButton = false});
+
+  @override
+  State<_BuildStyledButton> createState() => _BuildStyledButtonState();
+}
+
+class _BuildStyledButtonState extends State<_BuildStyledButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        if (widget.isSubmitButton) HapticFeedback.lightImpact();
+        widget.onTap();
+      },
+      child: AnimatedScale(
+        scale: _isPressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: widget.isSubmitButton ? const LinearGradient(colors: [Color(0xFF42A5F5), Color(0xFF1976D2)]) : null,
+            color: !widget.isSubmitButton ? Colors.white.withOpacity(0.8) : null,
+            borderRadius: BorderRadius.circular(25.0),
+            boxShadow: [BoxShadow(color: Colors.blue.withOpacity(0.3), spreadRadius: 2, blurRadius: 10, offset: const Offset(0, 5))],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 14.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.icon != null) Icon(widget.icon, color: const Color(0xFF012A4A)),
+                if (widget.icon != null) const SizedBox(width: 8),
+                Text(widget.text, style: GoogleFonts.poppins(fontSize: 16, color: widget.isSubmitButton ? Colors.white : const Color(0xFF012A4A), fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AnimatedSection extends StatefulWidget {
+  final int delay;
+  final Widget child;
+
+  const _AnimatedSection({required this.delay, required this.child});
+
+  @override
+  State<_AnimatedSection> createState() => _AnimatedSectionState();
+}
+
+class _AnimatedSectionState extends State<_AnimatedSection> {
+  bool _animate = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) {
+        setState(() {
+          _animate = true;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+      opacity: _animate ? 1.0 : 0.0,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+        transform: _animate
+            ? Matrix4.identity()
+            : (Matrix4.identity()
+          ..setEntry(3, 2, 0.001)
+          ..rotateX(-0.3)
+          ..translate(0.0, 50.0, 0.0)),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
 class DottedLine extends StatelessWidget {
   const DottedLine({super.key, this.height = 1, this.color = Colors.grey});
   final double height;
@@ -331,18 +452,14 @@ class DottedLine extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final boxWidth = constraints.constrainWidth();
-        const dashWidth = 5.0;
+        const dashWidth = 4.0;
         final dashHeight = height;
         final dashCount = (boxWidth / (2 * dashWidth)).floor();
         return Flex(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           direction: Axis.horizontal,
           children: List.generate(dashCount, (_) {
-            return SizedBox(
-              width: dashWidth,
-              height: dashHeight,
-              child: DecoratedBox(decoration: BoxDecoration(color: color)),
-            );
+            return SizedBox(width: dashWidth, height: dashHeight, child: DecoratedBox(decoration: BoxDecoration(color: color)));
           }),
         );
       },
