@@ -29,11 +29,12 @@ class _UserInputScreenState extends State<UserInputScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // A list of all our form sections (widgets)
+
     final formSections = [
       _buildSectionCard(
         title: 'Location',
         children: [
+
           _BuildTextField('PIN Code', _pinCodeController),
           const SizedBox(height: 16),
           _BuildTextField('Address', _addressController),
@@ -46,9 +47,14 @@ class _UserInputScreenState extends State<UserInputScreen> {
         children: [
           _BuildTextField('Roof Area', _roofAreaController, suffixText: 'm²'),
           const SizedBox(height: 16),
-          _GlassmorphicContainer(
-            borderRadius: 15,
+
+          Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+            decoration: BoxDecoration(
+                color: Colors.blue.shade50.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: Colors.white, width: 1.5)
+            ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _roofMaterial,
@@ -77,7 +83,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
     ];
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar:true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -85,14 +91,16 @@ class _UserInputScreenState extends State<UserInputScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              // Changed to a blue gradient to match the submit button
+              gradient: const LinearGradient(colors: [Color(0xFF42A5F5), Color(0xFF1976D2)]),
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)
+                BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 10)
               ],
             ),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Color(0xFF012A4A)),
+              // Changed the icon color to white
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -138,8 +146,9 @@ class _UserInputScreenState extends State<UserInputScreen> {
           ),
           itemCount: formSections.length,
           itemBuilder: (context, index) {
+
             return _AnimatedSection(
-              delay: 150 * (index + 1),
+              delay: 110 * (index+1),
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 24.0),
                 child: formSections[index],
@@ -240,6 +249,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
   }
 }
 
+
 class _GlassmorphicContainer extends StatelessWidget {
   final Widget child;
   final double borderRadius;
@@ -269,6 +279,7 @@ class _GlassmorphicContainer extends StatelessWidget {
   }
 }
 
+
 class _BuildTextField extends StatefulWidget {
   final String hintText;
   final TextEditingController controller;
@@ -282,11 +293,16 @@ class _BuildTextField extends StatefulWidget {
 
 class _BuildTextFieldState extends State<_BuildTextField> {
   final FocusNode _focusNode = FocusNode();
+  bool _isFocused = false;
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(() => setState(() {}));
+    _focusNode.addListener(() {
+      setState(() {
+        _isFocused = _focusNode.hasFocus;
+      });
+    });
   }
 
   @override
@@ -297,46 +313,53 @@ class _BuildTextFieldState extends State<_BuildTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
+
+    return TweenAnimationBuilder<Decoration>(
       duration: const Duration(milliseconds: 300),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: _focusNode.hasFocus ? Colors.blue.shade300 : Colors.white.withOpacity(0.2),
-          width: 1.5,
-        ),
-        boxShadow: _focusNode.hasFocus
-            ? [BoxShadow(color: Colors.blue.withOpacity(0.2), blurRadius: 8, spreadRadius: 2)]
-            : [],
+      // Animate between two decoration styles based on focus state.
+      tween: DecorationTween(
+        begin: _buildDecoration(isFocused: false),
+        end: _buildDecoration(isFocused: _isFocused),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            color: Colors.white.withOpacity(0.4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (context, decoration, child) {
+        return Container(
+          decoration: decoration,
+          child: child,
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(child: Text(widget.hintText, style: GoogleFonts.poppins(color: const Color(0xFF012A4A), fontSize: 16, fontWeight: FontWeight.w600))),
-                    if (widget.suffixText != null) Text(widget.suffixText!, style: const TextStyle(fontSize: 16, color: Colors.grey)),
-                  ],
-                ),
-                TextField(
-                  focusNode: _focusNode,
-                  controller: widget.controller,
-                  decoration: const InputDecoration(isDense: true, contentPadding: EdgeInsets.zero, border: InputBorder.none),
-                  style: GoogleFonts.poppins(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w500),
-                  keyboardType: widget.hintText.contains('PIN Code') || widget.hintText.contains('Roof Area') ? TextInputType.number : TextInputType.text,
-                ),
-                DottedLine(color: Colors.black54),
+                Expanded(child: Text(widget.hintText, style: GoogleFonts.poppins(color: const Color(0xFF012A4A), fontSize: 16, fontWeight: FontWeight.w600))),
+                if (widget.suffixText != null) Text(widget.suffixText!, style: const TextStyle(fontSize: 16, color: Colors.grey)),
               ],
             ),
-          ),
+            TextField(
+              focusNode: _focusNode,
+              controller: widget.controller,
+              decoration: const InputDecoration(isDense: true, contentPadding: EdgeInsets.zero, border: InputBorder.none),
+              style: GoogleFonts.poppins(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w500),
+              keyboardType: widget.hintText.contains('PIN Code') || widget.hintText.contains('Roof Area') ? TextInputType.number : TextInputType.text,
+            ),
+            const DottedLine(color: Colors.black54),
+          ],
         ),
+      ),
+    );
+  }
+
+
+  BoxDecoration _buildDecoration({required bool isFocused}) {
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(15),
+      color: isFocused ? Colors.white : Colors.white.withOpacity(0.5),
+      border: Border.all(
+        color: isFocused ? Colors.blue.shade300 : Colors.white.withOpacity(0.7),
+        width: 1.5,
       ),
     );
   }
@@ -396,6 +419,7 @@ class _BuildStyledButtonState extends State<_BuildStyledButton> {
   }
 }
 
+
 class _AnimatedSection extends StatefulWidget {
   final int delay;
   final Widget child;
@@ -430,12 +454,8 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeOut,
-        transform: _animate
-            ? Matrix4.identity()
-            : (Matrix4.identity()
-          ..setEntry(3, 2, 0.001)
-          ..rotateX(-0.3)
-          ..translate(0.0, 50.0, 0.0)),
+        // Replaced the complex 3D rotation with a simple, smooth slide-up translation.
+        transform: Matrix4.translationValues(0, _animate ? 0 : 50, 0),
         child: widget.child,
       ),
     );
