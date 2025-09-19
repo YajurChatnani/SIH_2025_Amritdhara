@@ -1,4 +1,6 @@
 // lib/screens/home_screen.dart
+import 'map_screen.dart';
+
 
 import 'package:amritdhara/screens/user_input_screen.dart';
 import 'package:flutter/material.dart';
@@ -108,16 +110,24 @@ class HomePage extends StatelessWidget {
                 Text(getGreeting(), style: const TextStyle(fontSize: 22, color: Colors.black54)),
                 const Text('John', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF012A4A))),
                 const SizedBox(height: 20),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(25.0),
-                    border: Border.all(color: const Color(0xFF012A4A), width: 3),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), spreadRadius: 3, blurRadius: 15, offset: const Offset(0, 8))],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(22.0),
-                    child: Image.asset('assets/images/map.png', fit: BoxFit.cover, height: 180, width: double.infinity),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const PolygonMapScreen()), // 👈 Navigate to new screen
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(25.0),
+                      border: Border.all(color: const Color(0xFF012A4A), width: 3),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), spreadRadius: 3, blurRadius: 15, offset: const Offset(0, 8))],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(22.0),
+                      child: Image.asset('assets/images/map.png', fit: BoxFit.cover, height: 180, width: double.infinity),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 30),
