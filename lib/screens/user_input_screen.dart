@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'dart:ui'; // Needed for the blur effect
 import 'package:flutter/services.dart'; // Needed for Haptic Feedback
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../model/feasibility_models.dart';
+import './report_screen.dart'; // Fixed import path
 
 class UserInputScreen extends StatefulWidget {
   const UserInputScreen({super.key});
@@ -18,6 +22,10 @@ class _UserInputScreenState extends State<UserInputScreen> {
 
   String? _roofMaterial = 'Concrete';
   String _locationType = 'Urban';
+  bool _isLoading = false;
+
+  // Replace with your computer's actual IP address
+  static const String _backendUrl = 'http://192.168.29.49:5000'; // CHANGE XXX to your IP
 
   @override
   void dispose() {
@@ -27,19 +35,158 @@ class _UserInputScreenState extends State<UserInputScreen> {
     super.dispose();
   }
 
+  Future<void> _submitForm() async {
+    // Validate inputs
+    if (!_validateInputs()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      print('🔄 Starting API call...');
+      print('📍 URL: $_backendUrl/api/feasibility');
+
+      // Create request object
+      final request = FeasibilityRequest(
+        roofArea: double.parse(_roofAreaController.text),
+        pincode: _pinCodeController.text,
+      );
+
+      print('📊 Request data: ${request.toJson()}');
+
+      // Make direct HTTP call to your Flask backend
+      final response = await http.post(
+        Uri.parse('$_backendUrl/api/feasibility'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(request.toJson()),
+      ).timeout(
+        Duration(seconds: 30),
+        onTimeout: () {
+          print('❌ Request timed out after 30 seconds');
+          throw Exception('Request timeout - backend may not be running');
+        },
+      );
+
+      print('📡 Response status: ${response.statusCode}');
+      print('📝 Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        print('✅ Successfully parsed response');
+        final feasibilityResponse = FeasibilityResponse.fromJson(data);
+
+        // Navigate to report screen
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ReportScreen(response: feasibilityResponse),
+            ),
+          );
+        }
+      } else {
+        print('❌ API Error - Status: ${response.statusCode}');
+        final Map<String, dynamic> errorData = json.decode(response.body);
+        final errorMessage = errorData['error'] ?? 'Unknown error occurred';
+        print('❌ Error message: $errorMessage');
+        _showErrorDialog(errorMessage);
+      }
+    } catch (e) {
+      print('❌ Exception in submitForm: $e');
+      _showErrorDialog('Failed to get feasibility data: ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  bool _validateInputs() {
+    if (_pinCodeController.text.trim().isEmpty) {
+      _showErrorDialog('Please enter PIN Code');
+      return false;
+    }
+
+    if (_pinCodeController.text.trim().length != 6) {
+      _showErrorDialog('PIN Code must be 6 digits');
+      return false;
+    }
+
+    if (_roofAreaController.text.trim().isEmpty) {
+      _showErrorDialog('Please enter roof area');
+      return false;
+    }
+
+    final roofArea = double.tryParse(_roofAreaController.text.trim());
+    if (roofArea == null || roofArea <= 0) {
+      _showErrorDialog('Please enter a valid roof area');
+      return false;
+    }
+
+    return true;
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _getCurrentLocation() async {
+    // TODO: Implement location services
+    // You can use packages like geolocator to get current location
+    // and geocoding to get pincode from coordinates
+    _showInfoDialog('Location feature will be implemented soon!');
+  }
+
+  void _showInfoDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Info'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-
     final formSections = [
       _buildSectionCard(
         title: 'Location',
         children: [
-
           _BuildTextField('PIN Code', _pinCodeController),
           const SizedBox(height: 16),
           _BuildTextField('Address', _addressController),
           const SizedBox(height: 16),
-          _BuildStyledButton(text: 'Use location', icon: Icons.location_on_outlined, onTap: () {}),
+          _BuildStyledButton(
+            text: 'Use location',
+            icon: Icons.location_on_outlined,
+            onTap: _getCurrentLocation,
+          ),
         ],
       ),
       _buildSectionCard(
@@ -47,7 +194,6 @@ class _UserInputScreenState extends State<UserInputScreen> {
         children: [
           _BuildTextField('Roof Area', _roofAreaController, suffixText: 'm²'),
           const SizedBox(height: 16),
-
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
             decoration: BoxDecoration(
@@ -79,11 +225,19 @@ class _UserInputScreenState extends State<UserInputScreen> {
           _buildToggleButtons(),
         ],
       ),
-      Center(child: _BuildStyledButton(text: 'SUBMIT', isSubmitButton: true, onTap: () {})),
+      Center(
+        child: _isLoading
+            ? const CircularProgressIndicator()
+            : _BuildStyledButton(
+          text: 'SUBMIT',
+          isSubmitButton: true,
+          onTap: _submitForm,
+        ),
+      ),
     ];
 
     return Scaffold(
-      extendBodyBehindAppBar:true,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -91,7 +245,6 @@ class _UserInputScreenState extends State<UserInputScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             decoration: BoxDecoration(
-              // Changed to a blue gradient to match the submit button
               gradient: const LinearGradient(colors: [Color(0xFF42A5F5), Color(0xFF1976D2)]),
               shape: BoxShape.circle,
               boxShadow: [
@@ -99,7 +252,6 @@ class _UserInputScreenState extends State<UserInputScreen> {
               ],
             ),
             child: IconButton(
-              // Changed the icon color to white
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
@@ -146,7 +298,6 @@ class _UserInputScreenState extends State<UserInputScreen> {
           ),
           itemCount: formSections.length,
           itemBuilder: (context, index) {
-
             return _AnimatedSection(
               delay: 110 * (index+1),
               child: Padding(
@@ -249,7 +400,6 @@ class _UserInputScreenState extends State<UserInputScreen> {
   }
 }
 
-
 class _GlassmorphicContainer extends StatelessWidget {
   final Widget child;
   final double borderRadius;
@@ -278,7 +428,6 @@ class _GlassmorphicContainer extends StatelessWidget {
     );
   }
 }
-
 
 class _BuildTextField extends StatefulWidget {
   final String hintText;
@@ -313,10 +462,8 @@ class _BuildTextFieldState extends State<_BuildTextField> {
 
   @override
   Widget build(BuildContext context) {
-
     return TweenAnimationBuilder<Decoration>(
       duration: const Duration(milliseconds: 300),
-      // Animate between two decoration styles based on focus state.
       tween: DecorationTween(
         begin: _buildDecoration(isFocused: false),
         end: _buildDecoration(isFocused: _isFocused),
@@ -351,7 +498,6 @@ class _BuildTextFieldState extends State<_BuildTextField> {
       ),
     );
   }
-
 
   BoxDecoration _buildDecoration({required bool isFocused}) {
     return BoxDecoration(
@@ -419,7 +565,6 @@ class _BuildStyledButtonState extends State<_BuildStyledButton> {
   }
 }
 
-
 class _AnimatedSection extends StatefulWidget {
   final int delay;
   final Widget child;
@@ -454,7 +599,6 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeOut,
-        // Replaced the complex 3D rotation with a simple, smooth slide-up translation.
         transform: Matrix4.translationValues(0, _animate ? 0 : 50, 0),
         child: widget.child,
       ),
