@@ -2,9 +2,12 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:google_fonts/google_fonts.dart';
+import '../model/feasibility_models.dart';
 
 class ReportScreen extends StatefulWidget {
-  const ReportScreen({super.key});
+  final FeasibilityResponse? response;
+
+  const ReportScreen({super.key, this.response});
 
   @override
   State<ReportScreen> createState() => _ReportScreenState();
@@ -13,7 +16,27 @@ class ReportScreen extends StatefulWidget {
 class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
-    const double feasibilityPercentage = 0.75;
+    // Handle null response
+    if (widget.response == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Error')),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error, size: 64, color: Colors.red),
+              SizedBox(height: 16),
+              Text('No feasibility data available'),
+              Text('Please try again'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Get the best feasibility score from the response
+    final double bestScore = widget.response!.feasibilityScores.getBestScore();
+    final double feasibilityPercentage = bestScore / 100.0; // Convert to 0-1 range for positioning
 
     final reportCards = [
       _InfoCard(
@@ -35,7 +58,7 @@ class _ReportScreenState extends State<ReportScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Feasibility', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[700])),
-                const Text('75%', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF012A4A))),
+                Text('${bestScore.toStringAsFixed(0)}%', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF012A4A))),
               ],
             ),
             const SizedBox(height: 12),

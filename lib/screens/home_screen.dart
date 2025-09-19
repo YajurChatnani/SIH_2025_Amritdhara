@@ -161,7 +161,7 @@ class HomePage extends StatelessWidget {
                           gradient: const LinearGradient(colors: [Color(0xFF4FC3F7), Color(0xFFE1F5FE)], begin: Alignment.centerLeft, end: Alignment.centerRight),
                           textColor: const Color(0xFF01579B),
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportScreen()));
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportScreen(response: null,)));
                           },
                         ),
                       ],
