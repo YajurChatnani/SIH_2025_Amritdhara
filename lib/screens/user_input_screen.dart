@@ -1,12 +1,12 @@
 // lib/screens/user_input_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:ui'; // Needed for the blur effect
-import 'package:flutter/services.dart'; // Needed for Haptic Feedback
+import 'package:flutter/services.dart'; // Needed for Haptic Feedback and TextInputFormatter
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../model/feasibility_models.dart';
-import './report_screen.dart'; // Fixed import path
+import './report_screen.dart';
 
 class UserInputScreen extends StatefulWidget {
   const UserInputScreen({super.key});
@@ -19,6 +19,8 @@ class _UserInputScreenState extends State<UserInputScreen> {
   final _pinCodeController = TextEditingController();
   final _addressController = TextEditingController();
   final _roofAreaController = TextEditingController();
+  final _openAreaController = TextEditingController();
+  final _dwellersController = TextEditingController();
 
   String? _roofMaterial = 'Concrete';
   String _locationType = 'Urban';
@@ -32,6 +34,8 @@ class _UserInputScreenState extends State<UserInputScreen> {
     _pinCodeController.dispose();
     _addressController.dispose();
     _roofAreaController.dispose();
+    _openAreaController.dispose();
+    _dwellersController.dispose();
     super.dispose();
   }
 
@@ -46,18 +50,16 @@ class _UserInputScreenState extends State<UserInputScreen> {
     });
 
     try {
-      print('🔄 Starting API call...');
-      print('📍 URL: $_backendUrl/api/feasibility');
-
-      // Create request object
       final request = FeasibilityRequest(
         roofArea: double.parse(_roofAreaController.text),
         pincode: _pinCodeController.text,
+        address: _addressController.text,
+        roofMaterial: _roofMaterial ?? 'Other',
+        locationType: _locationType,
+        openArea: double.parse(_openAreaController.text),
+        dwellers: int.parse(_dwellersController.text),
       );
 
-      print('📊 Request data: ${request.toJson()}');
-
-      // Make direct HTTP call to your Flask backend
       final response = await http.post(
         Uri.parse('$_backendUrl/api/feasibility'),
         headers: {
@@ -65,22 +67,15 @@ class _UserInputScreenState extends State<UserInputScreen> {
         },
         body: json.encode(request.toJson()),
       ).timeout(
-        Duration(seconds: 30),
+        const Duration(seconds: 30),
         onTimeout: () {
-          print('❌ Request timed out after 30 seconds');
           throw Exception('Request timeout - backend may not be running');
         },
       );
 
-      print('📡 Response status: ${response.statusCode}');
-      print('📝 Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-        print('✅ Successfully parsed response');
         final feasibilityResponse = FeasibilityResponse.fromJson(data);
-
-        // Navigate to report screen
         if (mounted) {
           Navigator.push(
             context,
@@ -90,14 +85,11 @@ class _UserInputScreenState extends State<UserInputScreen> {
           );
         }
       } else {
-        print('❌ API Error - Status: ${response.statusCode}');
         final Map<String, dynamic> errorData = json.decode(response.body);
         final errorMessage = errorData['error'] ?? 'Unknown error occurred';
-        print('❌ Error message: $errorMessage');
         _showErrorDialog(errorMessage);
       }
     } catch (e) {
-      print('❌ Exception in submitForm: $e');
       _showErrorDialog('Failed to get feasibility data: ${e.toString()}');
     } finally {
       if (mounted) {
@@ -113,23 +105,37 @@ class _UserInputScreenState extends State<UserInputScreen> {
       _showErrorDialog('Please enter PIN Code');
       return false;
     }
-
     if (_pinCodeController.text.trim().length != 6) {
       _showErrorDialog('PIN Code must be 6 digits');
       return false;
     }
-
     if (_roofAreaController.text.trim().isEmpty) {
       _showErrorDialog('Please enter roof area');
       return false;
     }
-
     final roofArea = double.tryParse(_roofAreaController.text.trim());
     if (roofArea == null || roofArea <= 0) {
       _showErrorDialog('Please enter a valid roof area');
       return false;
     }
-
+    if (_openAreaController.text.trim().isEmpty) {
+      _showErrorDialog('Please enter open area');
+      return false;
+    }
+    final openArea = double.tryParse(_openAreaController.text.trim());
+    if (openArea == null || openArea < 0) {
+      _showErrorDialog('Please enter a valid open area (can be 0)');
+      return false;
+    }
+    if (_dwellersController.text.trim().isEmpty) {
+      _showErrorDialog('Please enter the number of dwellers');
+      return false;
+    }
+    final dwellers = int.tryParse(_dwellersController.text.trim());
+    if (dwellers == null || dwellers <= 0) {
+      _showErrorDialog('Please enter a valid number of dwellers');
+      return false;
+    }
     return true;
   }
 
@@ -150,9 +156,6 @@ class _UserInputScreenState extends State<UserInputScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
-    // TODO: Implement location services
-    // You can use packages like geolocator to get current location
-    // and geocoding to get pincode from coordinates
     _showInfoDialog('Location feature will be implemented soon!');
   }
 
@@ -190,33 +193,45 @@ class _UserInputScreenState extends State<UserInputScreen> {
         ],
       ),
       _buildSectionCard(
-        title: 'Roof Details',
+        title: 'Area Details',
         children: [
           _BuildTextField('Roof Area', _roofAreaController, suffixText: 'm²'),
+          const SizedBox(height: 16),
+          _BuildTextField('Open Area', _openAreaController, suffixText: 'm²'),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
             decoration: BoxDecoration(
                 color: Colors.blue.shade50.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: Colors.white, width: 1.5)
-            ),
+                border: Border.all(color: Colors.white, width: 1.5)),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _roofMaterial,
                 isExpanded: true,
                 icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF012A4A)),
                 dropdownColor: Colors.blue.shade50.withOpacity(0.9),
-                onChanged: (String? newValue) => setState(() => _roofMaterial = newValue),
+                onChanged: (String? newValue) =>
+                    setState(() => _roofMaterial = newValue),
                 items: <String>['Concrete', 'Tin', 'Tiles', 'Other']
                     .map((String value) => DropdownMenuItem<String>(
                   value: value,
-                  child: Text(value, style: const TextStyle(color: Color(0xFF012A4A), fontSize: 16, fontWeight: FontWeight.w500)),
+                  child: Text(value,
+                      style: const TextStyle(
+                          color: Color(0xFF012A4A),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500)),
                 ))
                     .toList(),
               ),
             ),
           ),
+        ],
+      ),
+      _buildSectionCard(
+        title: 'Household Details',
+        children: [
+          _BuildTextField('No. of Dwellers', _dwellersController),
         ],
       ),
       _buildSectionCard(
@@ -245,7 +260,8 @@ class _UserInputScreenState extends State<UserInputScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF42A5F5), Color(0xFF1976D2)]),
+              gradient: const LinearGradient(
+                  colors: [Color(0xFF42A5F5), Color(0xFF1976D2)]),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 10)
@@ -275,7 +291,12 @@ class _UserInputScreenState extends State<UserInputScreen> {
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.5,
                 fontSize: 24,
-                shadows: [const Shadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 2))],
+                shadows: [
+                  const Shadow(
+                      color: Colors.black12,
+                      blurRadius: 5,
+                      offset: Offset(0, 2))
+                ],
               ),
             ),
           ),
@@ -286,7 +307,10 @@ class _UserInputScreenState extends State<UserInputScreen> {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(colors: [Color(0xFFD4EFFC), Colors.white], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+          gradient: LinearGradient(
+              colors: [Color(0xFFD4EFFC), Colors.white],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter),
         ),
         child: ListView.builder(
           physics: const BouncingScrollPhysics(),
@@ -299,7 +323,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
           itemCount: formSections.length,
           itemBuilder: (context, index) {
             return _AnimatedSection(
-              delay: 110 * (index+1),
+              delay: 110 * (index + 1),
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 24.0),
                 child: formSections[index],
@@ -331,9 +355,15 @@ class _UserInputScreenState extends State<UserInputScreen> {
                   width: width,
                   height: 50,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF42A5F5), Color(0xFF1976D2)]),
+                    gradient: const LinearGradient(
+                        colors: [Color(0xFF42A5F5), Color(0xFF1976D2)]),
                     borderRadius: BorderRadius.circular(15),
-                    boxShadow: [BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 10, spreadRadius: 2)],
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.blue.withOpacity(0.3),
+                          blurRadius: 10,
+                          spreadRadius: 2)
+                    ],
                   ),
                 ),
               ),
@@ -349,7 +379,13 @@ class _UserInputScreenState extends State<UserInputScreen> {
                         height: 50,
                         color: Colors.transparent,
                         child: Center(
-                          child: Text('Urban', style: TextStyle(color: _locationType == 'Urban' ? Colors.white : const Color(0xFF012A4A), fontWeight: FontWeight.bold, fontSize: 16)),
+                          child: Text('Urban',
+                              style: TextStyle(
+                                  color: _locationType == 'Urban'
+                                      ? Colors.white
+                                      : const Color(0xFF012A4A),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16)),
                         ),
                       ),
                     ),
@@ -364,7 +400,13 @@ class _UserInputScreenState extends State<UserInputScreen> {
                         height: 50,
                         color: Colors.transparent,
                         child: Center(
-                          child: Text('Rural', style: TextStyle(color: _locationType == 'Rural' ? Colors.white : const Color(0xFF012A4A), fontWeight: FontWeight.bold, fontSize: 16)),
+                          child: Text('Rural',
+                              style: TextStyle(
+                                  color: _locationType == 'Rural'
+                                      ? Colors.white
+                                      : const Color(0xFF012A4A),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16)),
                         ),
                       ),
                     ),
@@ -378,53 +420,37 @@ class _UserInputScreenState extends State<UserInputScreen> {
     );
   }
 
-  Widget _buildSectionCard({required String title, required List<Widget> children}) {
+  Widget _buildSectionCard(
+      {required String title, required List<Widget> children}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
-          child: Text(title, style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: const Color(0xFF012A4A))),
+          child: Text(title,
+              style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF012A4A))),
         ),
         Container(
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(25.0),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), spreadRadius: 2, blurRadius: 20, offset: const Offset(0, 5))],
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  spreadRadius: 2,
+                  blurRadius: 20,
+                  offset: const Offset(0, 5))
+            ],
           ),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children),
         ),
       ],
-    );
-  }
-}
-
-class _GlassmorphicContainer extends StatelessWidget {
-  final Widget child;
-  final double borderRadius;
-  final BoxShape shape;
-  final EdgeInsets? padding;
-
-  const _GlassmorphicContainer({required this.child, this.borderRadius = 25.0, this.shape = BoxShape.rectangle, this.padding});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: shape == BoxShape.circle ? BorderRadius.zero : BorderRadius.circular(borderRadius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            shape: shape,
-            borderRadius: shape == BoxShape.circle ? null : BorderRadius.circular(borderRadius),
-            color: Colors.white.withOpacity(0.4),
-            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
-          ),
-          child: child,
-        ),
-      ),
     );
   }
 }
@@ -462,6 +488,11 @@ class _BuildTextFieldState extends State<_BuildTextField> {
 
   @override
   Widget build(BuildContext context) {
+    // --- THIS IS THE SECTION THAT CHANGED ---
+    final isNumeric = widget.hintText.contains('PIN Code') ||
+        widget.hintText.contains('Area') ||
+        widget.hintText.contains('Dwellers');
+
     return TweenAnimationBuilder<Decoration>(
       duration: const Duration(milliseconds: 300),
       tween: DecorationTween(
@@ -481,16 +512,34 @@ class _BuildTextFieldState extends State<_BuildTextField> {
           children: [
             Row(
               children: [
-                Expanded(child: Text(widget.hintText, style: GoogleFonts.poppins(color: const Color(0xFF012A4A), fontSize: 16, fontWeight: FontWeight.w600))),
-                if (widget.suffixText != null) Text(widget.suffixText!, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                Expanded(
+                    child: Text(widget.hintText,
+                        style: GoogleFonts.poppins(
+                            color: const Color(0xFF012A4A),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600))),
+                if (widget.suffixText != null)
+                  Text(widget.suffixText!,
+                      style: const TextStyle(fontSize: 16, color: Colors.grey)),
               ],
             ),
             TextField(
               focusNode: _focusNode,
               controller: widget.controller,
-              decoration: const InputDecoration(isDense: true, contentPadding: EdgeInsets.zero, border: InputBorder.none),
-              style: GoogleFonts.poppins(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w500),
-              keyboardType: widget.hintText.contains('PIN Code') || widget.hintText.contains('Roof Area') ? TextInputType.number : TextInputType.text,
+              decoration: const InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                  border: InputBorder.none),
+              style: GoogleFonts.poppins(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500),
+              // Set keyboard type
+              keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
+              // Set input formatter to only allow digits for numeric fields
+              inputFormatters: isNumeric
+                  ? <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly]
+                  : null,
             ),
             const DottedLine(color: Colors.black54),
           ],
@@ -517,7 +566,11 @@ class _BuildStyledButton extends StatefulWidget {
   final VoidCallback onTap;
   final bool isSubmitButton;
 
-  const _BuildStyledButton({required this.text, this.icon, required this.onTap, this.isSubmitButton = false});
+  const _BuildStyledButton(
+      {required this.text,
+        this.icon,
+        required this.onTap,
+        this.isSubmitButton = false});
 
   @override
   State<_BuildStyledButton> createState() => _BuildStyledButtonState();
@@ -542,20 +595,37 @@ class _BuildStyledButtonState extends State<_BuildStyledButton> {
         curve: Curves.easeOut,
         child: Container(
           decoration: BoxDecoration(
-            gradient: widget.isSubmitButton ? const LinearGradient(colors: [Color(0xFF42A5F5), Color(0xFF1976D2)]) : null,
+            gradient: widget.isSubmitButton
+                ? const LinearGradient(
+                colors: [Color(0xFF42A5F5), Color(0xFF1976D2)])
+                : null,
             color: !widget.isSubmitButton ? Colors.white.withOpacity(0.8) : null,
             borderRadius: BorderRadius.circular(25.0),
-            boxShadow: [BoxShadow(color: Colors.blue.withOpacity(0.3), spreadRadius: 2, blurRadius: 10, offset: const Offset(0, 5))],
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.blue.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 10,
+                  offset: const Offset(0, 5))
+            ],
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 14.0),
+            padding:
+            const EdgeInsets.symmetric(horizontal: 32.0, vertical: 14.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (widget.icon != null) Icon(widget.icon, color: const Color(0xFF012A4A)),
+                if (widget.icon != null)
+                  Icon(widget.icon, color: const Color(0xFF012A4A)),
                 if (widget.icon != null) const SizedBox(width: 8),
-                Text(widget.text, style: GoogleFonts.poppins(fontSize: 16, color: widget.isSubmitButton ? Colors.white : const Color(0xFF012A4A), fontWeight: FontWeight.w600)),
+                Text(widget.text,
+                    style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: widget.isSubmitButton
+                            ? Colors.white
+                            : const Color(0xFF012A4A),
+                        fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -623,7 +693,10 @@ class DottedLine extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           direction: Axis.horizontal,
           children: List.generate(dashCount, (_) {
-            return SizedBox(width: dashWidth, height: dashHeight, child: DecoratedBox(decoration: BoxDecoration(color: color)));
+            return SizedBox(
+                width: dashWidth,
+                height: dashHeight,
+                child: DecoratedBox(decoration: BoxDecoration(color: color)));
           }),
         );
       },

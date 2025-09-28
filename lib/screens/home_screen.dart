@@ -1,9 +1,10 @@
-// lib/screens/home_screen.dart
-import 'map_screen.dart';
-
-
+import 'package:amritdhara/drawer/settings_drawer.dart';
+import 'package:amritdhara/screens/geowater_data_screen.dart';
+import 'package:amritdhara/screens/profile_screen.dart';
 import 'package:amritdhara/screens/user_input_screen.dart';
+import 'package:amritdhara/screens/vendor_screen.dart';
 import 'package:flutter/material.dart';
+import 'map_screen.dart';
 import 'report_screen.dart';
 import 'chat_screen.dart';
 
@@ -23,33 +24,37 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final cardWidth = (screenWidth - (16 * 2) - 16) / 2;
-
     return Scaffold(
+      drawer: const SettingsDrawer(),
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leadingWidth: 80,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.7),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                )
-              ],
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.menu, color: Color(0xFF012A4A)),
-              onPressed: () {},
-            ),
-          ),
+        leading: Builder(
+            builder: (context) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.7),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                      )
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.menu, color: Color(0xFF012A4A)),
+                    onPressed: () {
+                      Scaffold.of(context).openDrawer();
+                    },
+                  ),
+                ),
+              );
+            }
         ),
         title: Text(
           'AMRITDHARA',
@@ -72,7 +77,9 @@ class HomePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: GestureDetector(
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ProfileScreen()));
+              },
               child: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
@@ -114,7 +121,7 @@ class HomePage extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const PolygonMapScreen()), // 👈 Navigate to new screen
+                      MaterialPageRoute(builder: (context) => const PolygonMapScreen()),
                     );
                   },
                   child: Container(
@@ -156,35 +163,52 @@ class HomePage extends StatelessWidget {
                           },
                         ),
                         _QuickAccessCard(
-                          text: 'SUBSIDY',
-                          icon: Icons.currency_rupee_outlined,
-                          gradient: const LinearGradient(colors: [Color(0xFF4FC3F7), Color(0xFFE1F5FE)], begin: Alignment.centerLeft, end: Alignment.centerRight),
-                          textColor: const Color(0xFF01579B),
+                          text: 'VENDOR',
+                          icon: Icons.storefront_outlined,
+                          gradient: const LinearGradient(colors: [Color(0xFFE91E63), Color(0xFFF8BBD0)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                          textColor: const Color(0xFF880E4F),
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportScreen(response: null,)));
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const VendorsScreen()));
                           },
                         ),
                       ],
                     ),
-                    // --- CHANGED: Reduced spacing between rows ---
-                    const SizedBox(height: 12.0),
+                    const SizedBox(height: 16.0),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _QuickAccessCard(
                           text: 'CHAT BOT',
                           icon: Icons.chat_bubble_outline,
-                          gradient: const LinearGradient(colors: [Color(0xFFE91E63), Color(0xFFF8BBD0)], begin: Alignment.centerLeft, end: Alignment.centerRight),
-                          textColor: const Color(0xFF880E4F),
-                          width: cardWidth * 0.8,
+                          gradient: const LinearGradient(colors: [Color(0xFFFFB74D), Color(0xFFFFE0B2)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                          textColor: const Color(0xFFE65100),
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatScreen()));
+                          },
+                        ),
+                        _QuickAccessCard(
+                          text: 'GEOWATER\nDATA',
+                          icon: Icons.info_outline,
+                          gradient: const LinearGradient(colors: [Color(0xFF4FC3F7), Color(0xFFE1F5FE)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                          textColor: const Color(0xFF01579B),
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const GeowaterDataScreen()));
                           },
                         ),
                       ],
                     ),
                   ],
                 ),
+                const SizedBox(height: 30),
+                Row(
+                  children: [
+                    Container(width: 5, height: 28, color: const Color(0xFF012A4A)),
+                    const SizedBox(width: 10),
+                    const Text('PEOPLE ALSO ASK', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildFaqCard(),
                 const SizedBox(height: 20),
               ],
             ),
@@ -231,6 +255,51 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildFaqCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15.0),
+        child: ExpansionTile(
+          iconColor: const Color(0xFF012A4A),
+          collapsedIconColor: const Color(0xFF012A4A),
+          title: const Text(
+            'How does rooftop rainwater harvesting help recharge groundwater?',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
+              child: Text(
+                'It collects rainwater from your roof and directs it into the ground through specially designed systems like recharge pits or wells. This process actively replenishes underground aquifers, helping to raise the water table.',
+                textAlign: TextAlign.justify,
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _QuickAccessCard extends StatelessWidget {
@@ -258,8 +327,7 @@ class _QuickAccessCard extends StatelessWidget {
 
     return Container(
       width: actualWidth,
-      // --- CHANGED: Made the cards shorter ---
-      height: actualWidth * 0.85, // Was 0.9
+      height: actualWidth * 0.9,
       decoration: BoxDecoration(
         gradient: gradient,
         borderRadius: BorderRadius.circular(40.0),
@@ -284,10 +352,11 @@ class _QuickAccessCard extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 text,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontSize: 18,
                 ),
               ),
             ],

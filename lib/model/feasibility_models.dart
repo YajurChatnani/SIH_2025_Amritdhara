@@ -1,18 +1,34 @@
 import 'package:flutter/material.dart';
 
+// --- UPDATED: Added new fields for the API request ---
 class FeasibilityRequest {
   final double roofArea;
   final String pincode;
+  final String address;
+  final String roofMaterial;
+  final String locationType;
+  final double openArea;
+  final int dwellers;
 
   FeasibilityRequest({
     required this.roofArea,
     required this.pincode,
+    required this.address,
+    required this.roofMaterial,
+    required this.locationType,
+    required this.openArea,
+    required this.dwellers,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'roof_area': roofArea,
       'pincode': pincode,
+      'address': address,
+      'roof_material': roofMaterial,
+      'location_type': locationType,
+      'open_area': openArea,
+      'dwellers': dwellers,
     };
   }
 }
@@ -42,22 +58,41 @@ class FeasibilityResponse {
     );
   }
 
-  // Get the best feasibility method
   MethodScore getBestMethod() {
     return feasibilityScores.getBestMethod();
   }
 }
 
+// --- UPDATED: Mirrored request fields in the response's input section ---
 class FeasibilityInput {
   final double roofArea;
   final String pincode;
+  final String address;
+  final String roofMaterial;
+  final String locationType;
+  final double openArea;
+  final int dwellers;
 
-  FeasibilityInput({required this.roofArea, required this.pincode});
+
+  FeasibilityInput({
+    required this.roofArea,
+    required this.pincode,
+    required this.address,
+    required this.roofMaterial,
+    required this.locationType,
+    required this.openArea,
+    required this.dwellers,
+  });
 
   factory FeasibilityInput.fromJson(Map<String, dynamic> json) {
     return FeasibilityInput(
-      roofArea: json['roof_area'].toDouble(),
-      pincode: json['pincode'],
+      roofArea: (json['roof_area'] ?? 0.0).toDouble(),
+      pincode: json['pincode'] ?? '',
+      address: json['address'] ?? '',
+      roofMaterial: json['roof_material'] ?? '',
+      locationType: json['location_type'] ?? '',
+      openArea: (json['open_area'] ?? 0.0).toDouble(),
+      dwellers: json['dwellers'] ?? 0,
     );
   }
 }
@@ -164,37 +199,29 @@ class FeasibilityScores {
     ];
   }
 
-  // Get the best feasibility method based on highest score
   MethodScore getBestMethod() {
     List<MethodScore> methods = toMethodScores();
-
-    // Sort by score in descending order and return the first (highest)
     methods.sort((a, b) => b.score.compareTo(a.score));
     return methods.first;
   }
 
-  // Get top N methods (optional - useful if you want top 2-3 methods)
   List<MethodScore> getTopMethods(int count) {
     List<MethodScore> methods = toMethodScores();
     methods.sort((a, b) => b.score.compareTo(a.score));
     return methods.take(count).toList();
   }
 
-  // Get the highest score value only
   double getBestScore() {
     return [soakPit, rechargePit, trench, dugWell, shaft].reduce((a, b) => a > b ? a : b);
   }
 
-  // Get the name of the best method
   String getBestMethodName() {
     double bestScore = getBestScore();
-
     if (bestScore == soakPit) return 'Soak Pit';
     if (bestScore == rechargePit) return 'Recharge Pit';
     if (bestScore == trench) return 'Trench';
     if (bestScore == dugWell) return 'Dug Well';
     if (bestScore == shaft) return 'Shaft';
-
     return 'Unknown';
   }
 }

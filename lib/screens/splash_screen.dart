@@ -1,6 +1,7 @@
 // lib/screens/splash_screen.dart
 
 import 'dart:async';
+import 'package:amritdhara/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart'; // Import the home screen
 
@@ -17,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(const Duration(seconds: 3), () {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomePage()),
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
     });
   }
