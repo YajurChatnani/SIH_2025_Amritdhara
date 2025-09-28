@@ -2,10 +2,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:google_fonts/google_fonts.dart';
-import '../model/calculation_result.dart';
 
 class ReportScreen extends StatefulWidget {
-  final CalculationResult? response;
+  final response;
 
   const ReportScreen({super.key, this.response});
 
@@ -35,8 +34,21 @@ class _ReportScreenState extends State<ReportScreen> {
     }
 
     // Get the best feasibility score from the response
-    final double bestScore = widget.response!.CalculationScores.getBestScore();
-    final double feasibilityPercentage = bestScore / 100.0; // Convert to 0-1 range for positioning
+    // Get the structure map from response
+    final Map<String, double> structureScores = widget.response!.structureScores;
+
+    // Find the structure with the highest score
+    final MapEntry<String, double> bestEntry =
+    structureScores.entries.reduce((a, b) => a.value > b.value ? a : b);
+
+    // Extract best structure and score
+    final String bestStructure = bestEntry.key;
+    print('${bestStructure}');
+    final double bestfeasibilityScore = bestEntry.value;
+    final double feasibilityPercentage = bestfeasibilityScore / 100.0; // Convert to 0-1 range for positioning
+    final int costEstimate_low = widget.response!.costEstimate_low;
+    final int costEstimate_high = widget.response!.costEstimate_high;
+    final int annual_harvest_potential = widget.response!.annual_harvest_potential;
 
     final reportCards = [
       _InfoCard(
@@ -46,7 +58,8 @@ class _ReportScreenState extends State<ReportScreen> {
           children: [
             Text('Estimated Cost', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[700])),
             const SizedBox(height: 8),
-            Text('₹ 2500 - 2600 /- ', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
+
+            Text('₹ ${costEstimate_low.toStringAsFixed(0)} - ${costEstimate_high.toStringAsFixed(0)} /- ', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
           ],
         ),
       ),
@@ -58,7 +71,7 @@ class _ReportScreenState extends State<ReportScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Feasibility', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[700])),
-                Text('${bestScore.toStringAsFixed(0)}%', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF012A4A))),
+                Text('${bestfeasibilityScore.toStringAsFixed(0)}%', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF012A4A))),
               ],
             ),
             const SizedBox(height: 12),
@@ -97,7 +110,7 @@ class _ReportScreenState extends State<ReportScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('260000', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
+                Text('${annual_harvest_potential.toStringAsFixed(0)}', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
                 const SizedBox(width: 8),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),

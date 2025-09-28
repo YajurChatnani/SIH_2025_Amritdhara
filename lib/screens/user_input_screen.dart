@@ -5,8 +5,8 @@ import 'package:flutter/services.dart'; // Needed for Haptic Feedback and TextIn
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../model/calculation_result.dart';
 import './report_screen.dart';
+import '../rainwater_backend/data_fetch.dart';
 
 class UserInputScreen extends StatefulWidget {
   const UserInputScreen({super.key});
@@ -39,35 +39,14 @@ class _UserInputScreenState extends State<UserInputScreen> {
   Future<void> _submitForm() async {
     if (!_validateInputs()) return;
 
-    // Create a dummy response
-    final feasibilityResponse = CalculationResult(
-      input: FeasibilityInput(
-        roofArea: double.parse(_roofAreaController.text),
-        pincode: _pinCodeController.text,
-        address: _addressController.text,
-        roofMaterial: _roofMaterial ?? 'Other',
-        locationType: _locationType,
-        openArea: double.parse(_openAreaController.text),
-        dwellers: int.parse(_dwellersController.text),
-      ),
-      location: LocationData(
-        district: 'Dummy District',
-        state: 'Dummy State',
-      ),
-      data: EnvironmentalData(
-        avgMonsoon: 500,
-        maxMonsoon: 700,
-        soilType: 'Clay',
-        gwDepthM: 10,
-      ),
-      feasibilityScores: CalculationScores(
-        soakPit: 80,
-        rechargePit: 70,
-        trench: 60,
-        dugWell: 50,
-        shaft: 40,
-      ),
-      warning: null,
+    final DataResponse fetchedData = fetchData(
+      roofArea: double.parse(_roofAreaController.text.trim()),
+      pincode: _pinCodeController.text.trim(),
+      address: _addressController.text.trim(),
+      roofMaterial: _roofMaterial ?? 'Concrete',
+      locationType: _locationType,
+      openArea: double.parse(_openAreaController.text.trim()),
+      dwellers: int.parse(_dwellersController.text.trim()),
     );
 
     // Navigate to ReportScreen
@@ -75,7 +54,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ReportScreen(response: feasibilityResponse),
+          builder: (context) => ReportScreen(response: fetchedData),
         ),
       );
     }
