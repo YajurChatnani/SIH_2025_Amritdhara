@@ -33,14 +33,14 @@ class FeasibilityRequest {
   }
 }
 
-class FeasibilityResponse {
+class CalculationResult {
   final FeasibilityInput input;
   final LocationData location;
   final EnvironmentalData data;
-  final FeasibilityScores feasibilityScores;
+  final CalculationScores feasibilityScores;
   final String? warning;
 
-  FeasibilityResponse({
+  CalculationResult({
     required this.input,
     required this.location,
     required this.data,
@@ -48,18 +48,18 @@ class FeasibilityResponse {
     this.warning,
   });
 
-  factory FeasibilityResponse.fromJson(Map<String, dynamic> json) {
-    return FeasibilityResponse(
+  factory CalculationResult.fromJson(Map<String, dynamic> json) {
+    return CalculationResult(
       input: FeasibilityInput.fromJson(json['input']),
       location: LocationData.fromJson(json['location']),
       data: EnvironmentalData.fromJson(json['data']),
-      feasibilityScores: FeasibilityScores.fromJson(json['feasibility_scores']),
+      feasibilityScores: CalculationScores.fromJson(json['feasibility_scores']),
       warning: json['warning'],
     );
   }
 
   MethodScore getBestMethod() {
-    return feasibilityScores.getBestMethod();
+    return CalculationScores.getBestMethod();
   }
 }
 
@@ -134,14 +134,14 @@ class EnvironmentalData {
   }
 }
 
-class FeasibilityScores {
+class CalculationScores {
   final double soakPit;
   final double rechargePit;
   final double trench;
   final double dugWell;
   final double shaft;
 
-  FeasibilityScores({
+  CalculationScores({
     required this.soakPit,
     required this.rechargePit,
     required this.trench,
@@ -149,8 +149,8 @@ class FeasibilityScores {
     required this.shaft,
   });
 
-  factory FeasibilityScores.fromJson(Map<String, dynamic> json) {
-    return FeasibilityScores(
+  factory CalculationScores.fromJson(Map<String, dynamic> json) {
+    return CalculationScores(
       soakPit: json['soak_pit'].toDouble(),
       rechargePit: json['recharge_pit'].toDouble(),
       trench: json['trench'].toDouble(),

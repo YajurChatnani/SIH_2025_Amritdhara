@@ -134,7 +134,7 @@ def load_datasets():
 
     try:
         # Load pincode dataset
-        pincodes_df = pd.read_csv("pincodes of india.csv")
+        pincodes_df = pd.read_csv("pincodes_of_india.csv")
         print(f"Loaded pincodes dataset: {len(pincodes_df)} records")
         print(f"Pincode columns: {list(pincodes_df.columns)}")
 

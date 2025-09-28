@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:google_fonts/google_fonts.dart';
-import '../model/feasibility_models.dart';
+import '../model/calculation_result.dart';
 
 class ReportScreen extends StatefulWidget {
-  final FeasibilityResponse? response;
+  final CalculationResult? response;
 
   const ReportScreen({super.key, this.response});
 
@@ -35,7 +35,7 @@ class _ReportScreenState extends State<ReportScreen> {
     }
 
     // Get the best feasibility score from the response
-    final double bestScore = widget.response!.feasibilityScores.getBestScore();
+    final double bestScore = widget.response!.CalculationScores.getBestScore();
     final double feasibilityPercentage = bestScore / 100.0; // Convert to 0-1 range for positioning
 
     final reportCards = [

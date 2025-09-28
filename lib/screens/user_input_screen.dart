@@ -5,7 +5,7 @@ import 'package:flutter/services.dart'; // Needed for Haptic Feedback and TextIn
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../model/feasibility_models.dart';
+import '../model/calculation_result.dart';
 import './report_screen.dart';
 
 class UserInputScreen extends StatefulWidget {
@@ -26,9 +26,6 @@ class _UserInputScreenState extends State<UserInputScreen> {
   String _locationType = 'Urban';
   bool _isLoading = false;
 
-  // Replace with your computer's actual IP address
-  static const String _backendUrl = 'http://192.168.29.49:5000'; // CHANGE XXX to your IP
-
   @override
   void dispose() {
     _pinCodeController.dispose();
@@ -40,17 +37,11 @@ class _UserInputScreenState extends State<UserInputScreen> {
   }
 
   Future<void> _submitForm() async {
-    // Validate inputs
-    if (!_validateInputs()) {
-      return;
-    }
+    if (!_validateInputs()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final request = FeasibilityRequest(
+    // Create a dummy response
+    final feasibilityResponse = CalculationResult(
+      input: FeasibilityInput(
         roofArea: double.parse(_roofAreaController.text),
         pincode: _pinCodeController.text,
         address: _addressController.text,
@@ -58,45 +49,35 @@ class _UserInputScreenState extends State<UserInputScreen> {
         locationType: _locationType,
         openArea: double.parse(_openAreaController.text),
         dwellers: int.parse(_dwellersController.text),
-      );
+      ),
+      location: LocationData(
+        district: 'Dummy District',
+        state: 'Dummy State',
+      ),
+      data: EnvironmentalData(
+        avgMonsoon: 500,
+        maxMonsoon: 700,
+        soilType: 'Clay',
+        gwDepthM: 10,
+      ),
+      feasibilityScores: CalculationScores(
+        soakPit: 80,
+        rechargePit: 70,
+        trench: 60,
+        dugWell: 50,
+        shaft: 40,
+      ),
+      warning: null,
+    );
 
-      final response = await http.post(
-        Uri.parse('$_backendUrl/api/feasibility'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode(request.toJson()),
-      ).timeout(
-        const Duration(seconds: 30),
-        onTimeout: () {
-          throw Exception('Request timeout - backend may not be running');
-        },
+    // Navigate to ReportScreen
+    if (mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ReportScreen(response: feasibilityResponse),
+        ),
       );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        final feasibilityResponse = FeasibilityResponse.fromJson(data);
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ReportScreen(response: feasibilityResponse),
-            ),
-          );
-        }
-      } else {
-        final Map<String, dynamic> errorData = json.decode(response.body);
-        final errorMessage = errorData['error'] ?? 'Unknown error occurred';
-        _showErrorDialog(errorMessage);
-      }
-    } catch (e) {
-      _showErrorDialog('Failed to get feasibility data: ${e.toString()}');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
   }
 
