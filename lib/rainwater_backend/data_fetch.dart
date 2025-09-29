@@ -1,7 +1,7 @@
 // lib/model/data_fetch.dart
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
-
+import 'cost_and_harvest.dart';
 import 'package:flutter/foundation.dart' show compute;
 import 'feasibility_score.dart';
 
@@ -301,7 +301,17 @@ Future <DataResponse> fetchData({
       );
 
       final Map<String,double> structures = response.feasibilityScores;
-
+      final String bestStructure = getBestStructure(structures);
+      final List<int> costs = getCostEstimates(bestStructure);
+      final int costLow = costs[0];
+      final int costHigh = costs.isNotEmpty && costs.length > 1 ? costs[1] : costs[0];
+      print('low cost = ${costLow}');
+      print('high cost = ${costHigh}');
+      final double annualRainfall = rainfallPrediction ?? 0.0;
+      final int harvest = calculateAnnualHarvestPotential(roofArea, annualRainfall, roofMaterial);
+      print('annual harvest potential = ${harvest}');
+      final int sustainabilityDays = calculateWaterSustainabilityDays(harvest, dwellers);
+      print('No of days water is sustainabile = ${sustainabilityDays}');
 
   // For now, return predefined/dummy data
   // Map<String, double> structures = {
@@ -314,10 +324,10 @@ Future <DataResponse> fetchData({
 
   return DataResponse(
     structureScores : structures,
-    costEstimateLow: 1000,
-    costEstimateHigh: 2000,
-    annualHarvestPotential: 26000,
-    waterSustainabilityDays: 69,
+    costEstimateLow: costLow,
+    costEstimateHigh: costHigh,
+    annualHarvestPotential: harvest,
+    waterSustainabilityDays: sustainabilityDays,
   );
 }
 
