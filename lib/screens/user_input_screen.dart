@@ -1,26 +1,9 @@
+import 'package:amritdhara/rainwater_backend/data_fetch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui'; // Needed for the blur effect
 import './report_screen.dart';
-// Note: The import for data_fetch.dart is no longer needed.
-
-// --- Placeholder Class for the data model ---
-// This mimics the structure your ReportScreen expects.
-class DataResponse {
-  final Map<String, double> structureScores;
-  final int costEstimate_low;
-  final int costEstimate_high;
-  final int annual_harvest_potential;
-
-  DataResponse({
-    required this.structureScores,
-    required this.costEstimate_low,
-    required this.costEstimate_high,
-    required this.annual_harvest_potential,
-  });
-}
-
 
 class UserInputScreen extends StatefulWidget {
   const UserInputScreen({super.key});
@@ -50,7 +33,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
     super.dispose();
   }
 
-  // --- MODIFIED: This function now uses hardcoded data ---
+
   Future<void> _submitForm() async {
     if (!_validateInputs()) return;
 
@@ -58,27 +41,22 @@ class _UserInputScreenState extends State<UserInputScreen> {
       _isLoading = true;
     });
 
-    // Simulate a short loading delay for better UX
-    await Future.delayed(const Duration(seconds: 1));
-
-    // Create a hardcoded data object. This will be shown for any input.
-    final DataResponse hardcodedData = DataResponse(
-      structureScores: {
-        'Soak Pit': 78.0,
-        'Recharge Trench': 92.0, // ReportScreen will pick this as the best
-        'Borewell': 65.0,
-      },
-      costEstimate_low: 35000,
-      costEstimate_high: 55000,
-      annual_harvest_potential: 120000,
+    final DataResponse fetchedData = await fetchData(
+      roofArea: double.parse(_roofAreaController.text.trim()),
+      pincode: _pinCodeController.text.trim(),
+      address: _addressController.text.trim(),
+      roofMaterial: _roofMaterial ?? 'Concrete',
+      locationType: _locationType,
+      openArea: double.parse(_openAreaController.text.trim()),
+      dwellers: int.parse(_dwellersController.text.trim()),
     );
 
-    // Navigate to ReportScreen with the hardcoded data
+    // Navigate to ReportScreen
     if (mounted) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ReportScreen(response: hardcodedData),
+          builder: (context) => ReportScreen(response: fetchedData),
         ),
       );
     }

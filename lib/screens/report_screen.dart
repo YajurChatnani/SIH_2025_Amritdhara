@@ -36,19 +36,12 @@ class _ReportScreenState extends State<ReportScreen> {
     final MapEntry<String, double> bestEntry =
     structureScores.entries.reduce((a, b) => a.value > b.value ? a : b);
 
-    final double bestfeasibilityScore = bestEntry.value;
-    final double feasibilityPercentage = bestfeasibilityScore / 100.0;
-    final int costEstimate_low = widget.response.costEstimate_low;
-    final int costEstimate_high = widget.response.costEstimate_high;
-    final int annual_harvest_potential = widget.response.annual_harvest_potential;
-
-    // Safely get the new field with a hardcoded default
-    int waterSustainabilityDays;
-    try {
-      waterSustainabilityDays = widget.response.water_sustainability_days;
-    } catch (e) {
-      waterSustainabilityDays = 56; // Hardcoded default
-    }
+    final double bestFeasibilityScore = bestEntry.value;
+    final double feasibilityPercentage = bestFeasibilityScore / 100.0;
+    final int costEstimateLow = widget.response.costEstimateLow;
+    final int costEstimateHigh = widget.response.costEstimateHigh;
+    final int annualHarvestPotential = widget.response.annualHarvestPotential;
+    final int waterSustainabilityDays = widget.response.waterSustainabilityDays;
 
     // --- MODIFIED: Added new cards and buttons to this list ---
     final reportWidgets = [
@@ -59,7 +52,7 @@ class _ReportScreenState extends State<ReportScreen> {
           children: [
             Text('Estimated Cost', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[700])),
             const SizedBox(height: 8),
-            Text('₹ ${costEstimate_low} - ${costEstimate_high} /- ', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
+            Text('₹ ${costEstimateLow} - ${costEstimateHigh} /- ', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
           ],
         ),
       ),
@@ -71,7 +64,7 @@ class _ReportScreenState extends State<ReportScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Feasibility', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[700])),
-                Text('${bestfeasibilityScore.toStringAsFixed(0)}%', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF012A4A))),
+                Text('${bestFeasibilityScore.toStringAsFixed(0)}%', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF012A4A))),
               ],
             ),
             const SizedBox(height: 12),
@@ -109,7 +102,7 @@ class _ReportScreenState extends State<ReportScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('$annual_harvest_potential', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
+                Text('$annualHarvestPotential', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
                 const SizedBox(width: 8),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),

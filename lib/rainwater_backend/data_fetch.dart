@@ -3,6 +3,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
 
 import 'package:flutter/foundation.dart' show compute;
+import 'feasibility_score.dart';
 
 // Cache for CSV data
 List<List<dynamic>>? _cachedCsvData;
@@ -23,15 +24,17 @@ Future<void> initializeCsvData() async {
 /// Generic class to hold structured data returned by data_fetch.dart
 class DataResponse {
   final Map<String, double> structureScores;
-  final int costEstimate_low;
-  final int costEstimate_high;// e.g., cost, maintenance, etc.
-  final int annual_harvest_potential; // e.g., water harvest, yield, etc.
+  final int costEstimateLow;
+  final int costEstimateHigh;// e.g., cost, maintenance, etc.
+  final int annualHarvestPotential; // e.g., water harvest, yield, etc.
+  final int waterSustainabilityDays;
 
   DataResponse({
     required this.structureScores,
-    required this.costEstimate_low,
-    required this.costEstimate_high,
-    required this.annual_harvest_potential,
+    required this.costEstimateLow,
+    required this.costEstimateHigh,
+    required this.annualHarvestPotential,
+    required this.waterSustainabilityDays,
   });
 }
 
@@ -236,6 +239,12 @@ Future <DataResponse> fetchData({
   required int dwellers,
 })
   async {
+    double? rainfallIntensity;
+    double? maxMonsoonRainfall;
+    double? rainfallPrediction;
+    String? soilTexture;
+    double? gwl;
+
     final location = await getLocationFromPincode(pincode);
 
     if (location != null) {
@@ -245,9 +254,12 @@ Future <DataResponse> fetchData({
       final rainfall_prediction = await getPredictionsFromDistrict(location['district'].toString());
 
       if (rainfall_prediction != null) {
-        print("✅Rainfall Intensity: ${rainfall_prediction['rainfall_intensity']}");
-        print("Max Monsoon Rainfall: ${rainfall_prediction['max_monsoon_rainfall']}");
-        print("Annual Monsoon Rainfall: ${rainfall_prediction['annual_monsoon_rainfall']}");
+        rainfallIntensity = double.tryParse(rainfall_prediction['rainfall_intensity']?? "");
+        maxMonsoonRainfall = double.tryParse(rainfall_prediction['max_monsoon_rainfall'] ?? "");
+        rainfallPrediction = double.tryParse(rainfall_prediction['annual_monsoon_rainfall'] ?? "");
+        // print("✅Rainfall Intensity: ${rainfall_prediction['rainfall_intensity']}");
+        // print("Max Monsoon Rainfall: ${rainfall_prediction['max_monsoon_rainfall']}");
+        // print("Annual Monsoon Rainfall: ${rainfall_prediction['annual_monsoon_rainfall']}");
       }
       else {
         print("❌District Data not found!");
@@ -255,6 +267,7 @@ Future <DataResponse> fetchData({
 
       final texture = await getSoilTextureFromState(location['state'].toString());
       if(texture != null){
+        soilTexture = texture['soil_texture'];
         print("✅Soil texture: ${texture['soil_texture']}");
       }
       else{
@@ -263,6 +276,7 @@ Future <DataResponse> fetchData({
 
       final GWLevel = await getGwlFromState(location['state'].toString());
       if(GWLevel != null){
+        gwl = double.tryParse(GWLevel['gwl'] ?? "");
         print("✅gwl: ${GWLevel['gwl']}");
       }
       else{
@@ -274,20 +288,36 @@ Future <DataResponse> fetchData({
       print("❌Pincode not found!");
     }
 
+    //Get Feasibility Scores
+
+      final FeasibilityResponse response = await fetchFeasibilityData(
+          rainfallIntensity: rainfallIntensity,
+          maxMonsoonRainfall: maxMonsoonRainfall,
+          rainfallPrediction: rainfallPrediction,
+          soilTexture: soilTexture,
+          gwl: gwl,
+          roofArea: roofArea,
+          openArea: openArea
+      );
+
+      final Map<String,double> structures = response.feasibilityScores;
+
+
   // For now, return predefined/dummy data
-  Map<String, double> structures = {
-    "Recharge pit": 55.0,
-    "Soak pit": 60.0,
-    "Recharge Shaft": 55.0,
-    "Recharge Trench": 80.0,
-    "Recharge Garden Pit": 40.0,
-  };
+  // Map<String, double> structures = {
+  //   "Recharge pit": 55.0,
+  //   "Soak pit": 60.0,
+  //   "Recharge Shaft": 55.0,
+  //   "Recharge Trench": 80.0,
+  //   "Recharge Garden Pit": 40.0,
+  // };
 
   return DataResponse(
     structureScores : structures,
-    costEstimate_low: 1000,
-    costEstimate_high: 2000,
-    annual_harvest_potential: 26000,
+    costEstimateLow: 1000,
+    costEstimateHigh: 2000,
+    annualHarvestPotential: 26000,
+    waterSustainabilityDays: 69,
   );
 }
 
