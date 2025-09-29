@@ -781,6 +781,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ensure the tank is covered to prevent algae growth and mosquito breeding.'**
   String get step6Point2;
+
+  /// No description provided for @bestStructure.
+  ///
+  /// In en, this message translates to:
+  /// **'Best Structure'**
+  String get bestStructure;
 }
 
 class _AppLocalizationsDelegate

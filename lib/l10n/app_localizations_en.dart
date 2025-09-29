@@ -360,4 +360,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get step6Point2 =>
       'Ensure the tank is covered to prevent algae growth and mosquito breeding.';
+
+  @override
+  String get bestStructure => 'Best Structure';
 }
