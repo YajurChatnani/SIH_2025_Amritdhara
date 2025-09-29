@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:google_fonts/google_fonts.dart';
 
+import '../l10n/app_localizations.dart';
+
+
 class ReportScreen extends StatefulWidget {
   final dynamic response;
 
@@ -16,6 +19,7 @@ class ReportScreen extends StatefulWidget {
 class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     if (widget.response == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Error')),
@@ -52,7 +56,11 @@ class _ReportScreenState extends State<ReportScreen> {
           children: [
             Text('Estimated Cost', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[700])),
             const SizedBox(height: 8),
-            Text('₹ ${costEstimateLow} - ${costEstimateHigh} /- ', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
+            Text('₹ ${costEstimateLow} - ${costEstimateHigh} /- ',
+                style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[850])),
           ],
         ),
       ),
@@ -63,8 +71,16 @@ class _ReportScreenState extends State<ReportScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Feasibility', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[700])),
-                Text('${bestFeasibilityScore.toStringAsFixed(0)}%', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF012A4A))),
+                Text(localizations.feasibility,
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700])),
+                Text('${bestFeasibilityScore.toStringAsFixed(0)}%',
+                    style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF012A4A))),
               ],
             ),
             const SizedBox(height: 12),
@@ -102,7 +118,11 @@ class _ReportScreenState extends State<ReportScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('$annualHarvestPotential', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
+                Text('$annualHarvestPotential',
+                    style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[850])),
                 const SizedBox(width: 8),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),
