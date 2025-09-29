@@ -11,7 +11,7 @@
 // lib/model/cost_harvest.dart
 
 //import 'feasibility_score.dart'; // Assuming this is where FeasibilityResponse is defined
-import 'data_fetch.dart'; // To access types like DataResponse if needed
+//import 'data_fetch.dart'; // To access types like DataResponse if needed
 
 // Efficiency coefficients for different roof materials
 const Map<String, double> efficiencyCoefficients = {
