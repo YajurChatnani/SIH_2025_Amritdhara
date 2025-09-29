@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui'; // For BackdropFilter
 
+import '../l10n/app_localizations.dart'; // IMPORT ADDED
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Get the localizations object once
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
-      // --- Custom App Bar ---
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -29,8 +33,9 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ),
+        // CHANGED
         title: Text(
-          'PROFILE',
+          localizations.profileTitle,
           style: GoogleFonts.poppins(
             fontSize: 20,
             fontWeight: FontWeight.w900,
@@ -41,7 +46,6 @@ class ProfileScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Container(
-        // --- MODIFIED: Restored your original gradient ---
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -59,8 +63,6 @@ class ProfileScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 30),
-
-                // --- Profile Picture ---
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
@@ -79,18 +81,17 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                   child: const CircleAvatar(
-                    radius: 55, // size of the circle
-                    backgroundColor: Color(0xFFE3F2FD), // light blue background
+                    radius: 55,
+                    backgroundColor: Color(0xFFE3F2FD),
                     child: Icon(
                       Icons.person,
                       size: 80,
-                      color: Color(0xFF0D47A1), // dark blue person silhouette
+                      color: Color(0xFF0D47A1),
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // --- User Name and Email ---
+                // User Name and Email are dynamic and should not be translated
                 Text(
                   'John Doe',
                   style: GoogleFonts.poppins(
@@ -108,27 +109,25 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 40),
-
-                // --- Editable Info Fields ---
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Column(
                     children: [
+                      // CHANGED
                       _buildInfoField(
-                        label: 'Pincode',
+                        label: localizations.pincode,
                         icon: Icons.push_pin_outlined,
                       ),
                       const SizedBox(height: 20),
+                      // CHANGED
                       _buildInfoField(
-                        label: 'Address',
+                        label: localizations.address,
                         icon: Icons.home_outlined,
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 50),
-
-                // --- Save Button ---
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40.0),
                   child: ElevatedButton(
@@ -146,8 +145,9 @@ class ProfileScreen extends StatelessWidget {
                       shadowColor: Colors.blue.withOpacity(0.4),
                       minimumSize: const Size(double.infinity, 50),
                     ),
+                    // CHANGED
                     child: Text(
-                      'Save Changes',
+                      localizations.saveChanges,
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -164,7 +164,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Helper widget for the modern, card-like text fields
   Widget _buildInfoField({required String label, required IconData icon}) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(15),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:math' as math; // Used for animation transform
+import '../l10n/app_localizations.dart'; // IMPORT ADDED
 
 // A simple data model for a vendor
 class Vendor {
   final String name;
-  final String role;
+  final String role; // Role will now be the translated string
   final String mobile;
   final String address;
 
@@ -20,36 +20,39 @@ class Vendor {
 class VendorsScreen extends StatelessWidget {
   const VendorsScreen({super.key});
 
-  // Sample list of vendors
-  final List<Vendor> activeVendors = const [
-    Vendor(
-      name: 'Mr. Mohan Kumar',
-      role: 'Contractor',
-      mobile: '1234561246',
-      address: 'J-45, Nehru Place, New Delhi',
-    ),
-    Vendor(
-      name: 'Mr. Ramkamal',
-      role: 'Contractor',
-      mobile: '1234561246',
-      address: 'B-112, Sector 5, Noida',
-    ),
-    Vendor(
-      name: 'Mr. Rajat Singh',
-      role: 'Contractor',
-      mobile: '1234561246',
-      address: 'D-2, Hauz Khas, New Delhi',
-    ),
-    Vendor(
-      name: 'Mr. Suresh Patel',
-      role: 'Plumber',
-      mobile: '9876543210',
-      address: '15/A, Karol Bagh, New Delhi',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    // Get the localizations object once
+    final localizations = AppLocalizations.of(context)!;
+
+    // CHANGED: Build the list inside the build method to use translations
+    final List<Vendor> activeVendors = [
+      Vendor(
+        name: 'Mr. Mohan Kumar',
+        role: localizations.roleContractor, // Use translated role
+        mobile: '1234561246',
+        address: 'J-45, Nehru Place, New Delhi',
+      ),
+      Vendor(
+        name: 'Mr. Ramkamal',
+        role: localizations.roleContractor, // Use translated role
+        mobile: '1234561246',
+        address: 'B-112, Sector 5, Noida',
+      ),
+      Vendor(
+        name: 'Mr. Rajat Singh',
+        role: localizations.roleContractor, // Use translated role
+        mobile: '1234561246',
+        address: 'D-2, Hauz Khas, New Delhi',
+      ),
+      Vendor(
+        name: 'Mr. Suresh Patel',
+        role: localizations.rolePlumber, // Use translated role
+        mobile: '9876543210',
+        address: '15/A, Karol Bagh, New Delhi',
+      ),
+    ];
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -61,7 +64,12 @@ class VendorsScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.lightBlue.withOpacity(0.8),
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 5, offset: const Offset(0, 2))],
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2))
+              ],
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -70,8 +78,9 @@ class VendorsScreen extends StatelessWidget {
             ),
           ),
         ),
+        // CHANGED
         title: Text(
-          'VENDORS',
+          localizations.vendorsTitle,
           style: GoogleFonts.poppins(
               fontWeight: FontWeight.w800,
               color: const Color(0xFF0D47A1),
@@ -82,8 +91,7 @@ class VendorsScreen extends StatelessWidget {
                   blurRadius: 5,
                   offset: Offset(0, 2),
                 )
-              ]
-          ),
+              ]),
         ),
         centerTitle: true,
       ),
@@ -104,21 +112,20 @@ class VendorsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // This is the static header section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height:  10), // Space for AppBar
-                    // --- MODIFIED: Divider is now BEFORE the text ---
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    const SizedBox(height: 10),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: Divider(color: Colors.black),
                     ),
                     const SizedBox(height: 10),
+                    // CHANGED
                     Text(
-                      'Active Vendors',
+                      localizations.activeVendors,
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -128,7 +135,6 @@ class VendorsScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              // This is the scrollable list
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 16.0),
@@ -157,12 +163,14 @@ class _VendorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get localizations object for this widget
+    final localizations = AppLocalizations.of(context)!;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12.0),
       decoration: BoxDecoration(
           color: const Color(0xFFD7F8FA),
           borderRadius: BorderRadius.circular(20.0),
-          // --- MODIFIED: Shadow is now deeper and more pronounced ---
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.15),
@@ -171,8 +179,7 @@ class _VendorCard extends StatelessWidget {
               offset: const Offset(0, 8),
             ),
           ],
-          border: Border.all(color: Colors.white.withOpacity(0.5))
-      ),
+          border: Border.all(color: Colors.white.withOpacity(0.5))),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -197,7 +204,7 @@ class _VendorCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    vendor.role,
+                    vendor.role, // This is now the translated role
                     style: GoogleFonts.poppins(
                       color: Colors.black54,
                       fontSize: 14,
@@ -205,9 +212,11 @@ class _VendorCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  // CHANGED
                   Text(
-                    'Mob. No. - ${vendor.mobile}',
-                    style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
+                    '${localizations.mobileNo} ${vendor.mobile}',
+                    style:
+                    GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -215,9 +224,11 @@ class _VendorCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Expanded(
+                        // CHANGED
                         child: Text(
-                          'Address - ${vendor.address}',
-                          style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
+                          '${localizations.addressLabel} ${vendor.address}',
+                          style: GoogleFonts.poppins(
+                              fontSize: 14, color: Colors.black87),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -230,16 +241,15 @@ class _VendorCard extends StatelessWidget {
                                   color: Colors.red.withOpacity(0.4),
                                   spreadRadius: 1,
                                   blurRadius: 10,
-                                  offset: const Offset(0, 4)
-                              )
-                            ]
-                        ),
+                                  offset: const Offset(0, 4))
+                            ]),
                         child: ElevatedButton.icon(
                           onPressed: () {
                             // TODO: Implement call functionality
                           },
                           icon: const Icon(Icons.call, size: 16),
-                          label: const Text('Call Now'),
+                          // CHANGED
+                          label: Text(localizations.callNow),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
@@ -261,8 +271,7 @@ class _VendorCard extends StatelessWidget {
   }
 }
 
-
-// Animation Widget for staggered list effect
+// ... _AnimatedSection widget remains the same ...
 class _AnimatedSection extends StatefulWidget {
   final int delay;
   final Widget child;

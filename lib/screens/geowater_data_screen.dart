@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui'; // Required for the BackdropFilter (glass effect)
 
+import '../l10n/app_localizations.dart';
+
 class GeowaterDataScreen extends StatelessWidget {
   const GeowaterDataScreen({super.key});
 
@@ -38,7 +40,7 @@ class GeowaterDataScreen extends StatelessWidget {
           ),
         ),
         title: Text(
-          'GEO WATER DATA',
+          AppLocalizations.of(context)!.geoWaterDataTitle,
           style: GoogleFonts.poppins(
             fontSize: 22,
             fontWeight: FontWeight.w900,
@@ -73,7 +75,7 @@ class GeowaterDataScreen extends StatelessWidget {
               children: [
                 _AnimatedFadeIn(
                   delay: 200,
-                  child: _buildPincodeInput(),
+                  child: _buildPincodeInput(context),
                 ),
                 const SizedBox(height: 24),
                 _AnimatedFadeIn(
@@ -88,7 +90,7 @@ class GeowaterDataScreen extends StatelessWidget {
                     children: [
                       _buildDataCard(
                         icon: Icons.terrain_outlined,
-                        label: 'Soil',
+                        label: AppLocalizations.of(context)!.soil,
                         value: 'Black Cotton',
                         gradient: const LinearGradient(
                           colors: [Color(0xFF8D6E63), Color(0xFFA1887F)],
@@ -98,7 +100,7 @@ class GeowaterDataScreen extends StatelessWidget {
                       ),
                       _buildDataCard(
                         icon: Icons.water_drop_outlined,
-                        label: 'Rainfall',
+                        label: AppLocalizations.of(context)!.rainfall,
                         value: '500-1000 mm',
                         gradient: const LinearGradient(
                           colors: [Color(0xFF29B6F6), Color(0xFF4FC3F7)],
@@ -108,7 +110,7 @@ class GeowaterDataScreen extends StatelessWidget {
                       ),
                       _buildDataCard(
                         icon: Icons.layers_outlined,
-                        label: 'Groundwater',
+                        label: AppLocalizations.of(context)!.groundwater,
                         value: '< 5m (High)',
                         gradient: const LinearGradient(
                           colors: [Color(0xFF4DB6AC), Color(0xFF80CBC4)],
@@ -118,7 +120,7 @@ class GeowaterDataScreen extends StatelessWidget {
                       ),
                       _buildDataCard(
                         icon: Icons.wb_sunny_outlined,
-                        label: 'Avg Temp',
+                        label: AppLocalizations.of(context)!.avgTemp,
                         value: '25-30 °C',
                         gradient: const LinearGradient(
                           colors: [Color(0xFFFFB74D), Color(0xFFFFD54F)],
@@ -132,7 +134,7 @@ class GeowaterDataScreen extends StatelessWidget {
                 const SizedBox(height: 30),
                 _AnimatedFadeIn(
                   delay: 600,
-                  child: _buildAquiferCard(context), // Pass context here
+                  child: _buildAquiferCard(context),
                 ),
               ],
             ),
@@ -142,7 +144,8 @@ class GeowaterDataScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPincodeInput() {
+  Widget _buildPincodeInput(BuildContext context) {
+    // ... (This widget is unchanged)
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
@@ -165,7 +168,7 @@ class GeowaterDataScreen extends StatelessWidget {
               color: const Color(0xFF012A4A),
             ),
             decoration: InputDecoration(
-              hintText: 'Enter Pincode',
+              hintText: AppLocalizations.of(context)!.enterPincode,
               hintStyle: GoogleFonts.poppins(color: Colors.black45),
               prefixIcon: const Icon(Icons.location_on_outlined,
                   color: Color(0xFF012A4A), size: 24),
@@ -181,6 +184,7 @@ class GeowaterDataScreen extends StatelessWidget {
     );
   }
 
+  // --- THIS WIDGET IS NOW FIXED ---
   Widget _buildDataCard({
     required IconData icon,
     required String label,
@@ -198,51 +202,55 @@ class GeowaterDataScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(25),
             border: Border.all(color: Colors.white.withOpacity(0.2)),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: gradient,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ],
+          // CHANGED: Wrapped Column in a SingleChildScrollView
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: gradient,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 30),
                 ),
-                child: Icon(icon, color: Colors.white, size: 30),
-              ),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF012A4A),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF012A4A),
+                  ),
                 ),
-              ),
-              Text(
-                value,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF012A4A),
+                Text(
+                  value,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF012A4A),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  // --- MODIFIED: Aquifer card is now clickable ---
   Widget _buildAquiferCard(BuildContext context) {
+    // ... (This widget is unchanged)
     const String imagePath = 'assets/images/aquifier.png';
 
     return ClipRRect(
@@ -268,7 +276,7 @@ class GeowaterDataScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Local Aquifer System',
+                AppLocalizations.of(context)!.localAquifer,
                 style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -276,26 +284,23 @@ class GeowaterDataScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 15),
-              // Use a Stack to overlay the zoom icon
               Stack(
                 alignment: Alignment.bottomRight,
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(15.0),
                     child: Image.asset(
-                      imagePath, // Use the variable
+                      imagePath,
                       fit: BoxFit.cover,
                       width: double.infinity,
                     ),
                   ),
-                  // Clickable gesture detector
                   Positioned.fill(
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(15.0),
                         onTap: () {
-                          // Navigate to the full-screen viewer
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -308,7 +313,6 @@ class GeowaterDataScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Visual cue icon
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
@@ -334,8 +338,8 @@ class GeowaterDataScreen extends StatelessWidget {
   }
 }
 
-// --- NEW WIDGET: A dedicated screen for full-screen image viewing ---
 class FullScreenImageViewer extends StatelessWidget {
+  // ... (This widget is unchanged)
   final String imageAssetPath;
 
   const FullScreenImageViewer({super.key, required this.imageAssetPath});
@@ -347,7 +351,6 @@ class FullScreenImageViewer extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // The back button will be white on the black background
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -355,8 +358,8 @@ class FullScreenImageViewer extends StatelessWidget {
       ),
       body: Center(
         child: InteractiveViewer(
-          maxScale: 5.0, // Set the maximum zoom level
-          minScale: 0.5, // Set the minimum zoom level
+          maxScale: 5.0,
+          minScale: 0.5,
           child: Image.asset(imageAssetPath),
         ),
       ),
@@ -364,8 +367,8 @@ class FullScreenImageViewer extends StatelessWidget {
   }
 }
 
-
 class _AnimatedFadeIn extends StatefulWidget {
+  // ... (This widget is unchanged)
   final int delay;
   final Widget child;
 

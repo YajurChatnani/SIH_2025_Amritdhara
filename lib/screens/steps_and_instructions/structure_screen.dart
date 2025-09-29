@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:ui'; // Required for the BackdropFilter (glass effect)
+import 'dart:ui'; // For BackdropFilter
+import 'package:amritdhara/screens/vendor_screen.dart';
+
+import '../../l10n/app_localizations.dart';
 
 class StructureScreen extends StatelessWidget {
   const StructureScreen({super.key});
@@ -8,6 +11,8 @@ class StructureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
+    // Get localizations object
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -32,8 +37,9 @@ class StructureScreen extends StatelessWidget {
             ),
           ),
         ),
+        // CHANGED
         title: Text(
-          'STRUCTURE & STEPS',
+          localizations.structureStepsTitle,
           style: GoogleFonts.poppins(
             fontSize: 22,
             fontWeight: FontWeight.w900,
@@ -42,6 +48,8 @@ class StructureScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
+      floatingActionButton: _buildVendorFab(context),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -60,7 +68,7 @@ class StructureScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: EdgeInsets.only(
             top: kToolbarHeight + statusBarHeight + 20,
-            bottom: 40,
+            bottom: 100, // Padding for FAB
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -73,7 +81,8 @@ class StructureScreen extends StatelessWidget {
                 const SizedBox(height: 30),
                 _AnimatedFadeIn(
                   delay: 400,
-                  child: _buildInstructionsCard(),
+                  // CHANGED: Pass localizations
+                  child: _buildInstructionsCard(context),
                 ),
               ],
             ),
@@ -83,7 +92,48 @@ class StructureScreen extends StatelessWidget {
     );
   }
 
-  // Helper widget for the top image card
+  Widget _buildVendorFab(BuildContext context) {
+    // ... (This widget from the previous step remains the same)
+    return FloatingActionButton.extended(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const VendorsScreen()),
+        );
+      },
+      backgroundColor: Colors.transparent,
+      elevation: 8.0,
+      label: Ink(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF42A5F5), Color(0xFF1976D2)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.storefront_outlined, color: Colors.white),
+              const SizedBox(width: 8),
+              Text(
+                AppLocalizations.of(context)!.getVendor,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildImageCard(BuildContext context) {
     const String imageUrl =
         'https://image.slidesharecdn.com/rainwaterharvestinginchandigarh-150822112431-lva1-app6891/95/rainwater-harvesting-in-chandigarharchitect-surinder-bahgaaugust-19-2015-29-638.jpg?cb=1440307048';
@@ -102,8 +152,9 @@ class StructureScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // CHANGED
               Text(
-                'Structure Diagram',
+                AppLocalizations.of(context)!.structureDiagram,
                 style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -114,7 +165,7 @@ class StructureScreen extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (_) {
-                    return const ImageDetailScreen(imageUrl: imageUrl);
+                    return ImageDetailScreen(imageUrl: imageUrl);
                   }));
                 },
                 child: Hero(
@@ -122,7 +173,6 @@ class StructureScreen extends StatelessWidget {
                   child: Stack(
                     alignment: Alignment.bottomRight,
                     children: [
-                      // --- MODIFIED: Added loading and error handling ---
                       ClipRRect(
                         borderRadius: BorderRadius.circular(15.0),
                         child: Image.network(
@@ -131,7 +181,7 @@ class StructureScreen extends StatelessWidget {
                           loadingBuilder: (context, child, loadingProgress) {
                             if (loadingProgress == null) return child;
                             return Container(
-                              height: 200, // Fixed height for loader
+                              height: 200,
                               alignment: Alignment.center,
                               child: CircularProgressIndicator(
                                 value: loadingProgress.expectedTotalBytes != null
@@ -145,7 +195,7 @@ class StructureScreen extends StatelessWidget {
                           },
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
-                              height: 200, // Fixed height for error
+                              height: 200,
                               color: Colors.grey.shade200,
                               child: const Center(
                                 child: Icon(
@@ -184,8 +234,10 @@ class StructureScreen extends StatelessWidget {
     );
   }
 
-  // Helper widget for the instructions list card
-  Widget _buildInstructionsCard() {
+  Widget _buildInstructionsCard(BuildContext context) {
+    // Get localizations object
+    final localizations = AppLocalizations.of(context)!;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(25),
       child: BackdropFilter(
@@ -200,8 +252,9 @@ class StructureScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // CHANGED
               Text(
-                'Step-by-Step Instructions',
+                localizations.stepByStepInstructions,
                 style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -209,49 +262,50 @@ class StructureScreen extends StatelessWidget {
                 ),
               ),
               const Divider(height: 24, thickness: 0.5),
+              // CHANGED: All steps now use translated text
               _buildInstructionStep(
                 number: '1.',
-                title: 'Assess Rooftop Area',
+                title: localizations.step1Title,
                 points: [
-                  'Measure the total catchment area (roof size).',
-                  'Ensure the roof is clean, sloped, and made of non-toxic material.',
+                  localizations.step1Point1,
+                  localizations.step1Point2,
                 ],
               ),
               _buildInstructionStep(
                 number: '2.',
-                title: 'Install Gutters and Downpipes',
+                title: localizations.step2Title,
                 points: [
-                  'Fix gutters along roof edges to collect rainwater.',
-                  'Connect downpipes to channel water to the storage or filtration system.',
+                  localizations.step2Point1,
+                  localizations.step2Point2,
                 ],
               ),
               _buildInstructionStep(
                 number: '3.',
-                title: 'Fit a Mesh or Leaf Guard',
+                title: localizations.step3Title,
                 points: [
-                  'Place a mesh filter at the top of downpipes to prevent leaves and debris from entering.',
+                  localizations.step3Point1,
                 ],
               ),
               _buildInstructionStep(
                 number: '4.',
-                title: 'Add a First Flush Diverter',
+                title: localizations.step4Title,
                 points: [
-                  'Install a system to discard the initial, more contaminated rainwater.',
+                  localizations.step4Point1,
                 ],
               ),
               _buildInstructionStep(
                 number: '5.',
-                title: 'Set Up Filtration System',
+                title: localizations.step5Title,
                 points: [
-                  'Use layers of gravel, sand, and charcoal to purify the water before storage.',
+                  localizations.step5Point1,
                 ],
               ),
               _buildInstructionStep(
                 number: '6.',
-                title: 'Install Storage Tank',
+                title: localizations.step6Title,
                 points: [
-                  'Choose a tank size based on your rooftop area and local rainfall patterns.',
-                  'Ensure the tank is covered to prevent algae growth and mosquito breeding.',
+                  localizations.step6Point1,
+                  localizations.step6Point2,
                 ],
               ),
             ],
@@ -261,12 +315,12 @@ class StructureScreen extends StatelessWidget {
     );
   }
 
-  // Helper widget for each individual instruction step
   Widget _buildInstructionStep({
     required String number,
     required String title,
     required List<String> points,
   }) {
+    // ... (This widget remains the same as it receives translated text)
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: Column(
@@ -309,7 +363,7 @@ class StructureScreen extends StatelessWidget {
   }
 }
 
-// Full-screen image viewer
+// ... (ImageDetailScreen and _AnimatedFadeIn widgets remain the same)
 class ImageDetailScreen extends StatelessWidget {
   final String imageUrl;
   const ImageDetailScreen({super.key, required this.imageUrl});
@@ -342,7 +396,7 @@ class ImageDetailScreen extends StatelessWidget {
                         ? loadingProgress.cumulativeBytesLoaded /
                         loadingProgress.expectedTotalBytes!
                         : null,
-                    color: Colors.white, // White loader for dark background
+                    color: Colors.white,
                   ),
                 );
               },
@@ -366,7 +420,6 @@ class ImageDetailScreen extends StatelessWidget {
   }
 }
 
-// Simple animation widget
 class _AnimatedFadeIn extends StatefulWidget {
   final int delay;
   final Widget child;
