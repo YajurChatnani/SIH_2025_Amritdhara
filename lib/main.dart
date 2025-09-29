@@ -1,7 +1,10 @@
 import 'package:amritdhara/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
+import './rainwater_backend/data_fetch.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Required for async operations
+  await initializeCsvData(); // Load CSV data during app startup
   runApp(const MyApp());
 }
 

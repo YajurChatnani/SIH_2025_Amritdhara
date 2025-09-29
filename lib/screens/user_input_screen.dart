@@ -39,7 +39,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
   Future<void> _submitForm() async {
     if (!_validateInputs()) return;
 
-    final DataResponse fetchedData = fetchData(
+    final DataResponse fetchedData = await fetchData(
       roofArea: double.parse(_roofAreaController.text.trim()),
       pincode: _pinCodeController.text.trim(),
       address: _addressController.text.trim(),

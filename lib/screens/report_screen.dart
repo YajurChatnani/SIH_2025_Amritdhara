@@ -43,7 +43,6 @@ class _ReportScreenState extends State<ReportScreen> {
 
     // Extract best structure and score
     final String bestStructure = bestEntry.key;
-    print('${bestStructure}');
     final double bestfeasibilityScore = bestEntry.value;
     final double feasibilityPercentage = bestfeasibilityScore / 100.0; // Convert to 0-1 range for positioning
     final int costEstimate_low = widget.response!.costEstimate_low;
