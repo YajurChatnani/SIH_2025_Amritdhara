@@ -361,4 +361,7 @@ class AppLocalizationsTe extends AppLocalizations {
   @override
   String get step6Point2 =>
       'ఆల్గే పెరుగుదల మరియు దోమల పునరుత్పత్తిని నివారించడానికి ట్యాంక్‌ను కప్పి ఉంచండి.';
+
+  @override
+  String get bestStructure => 'Best Structure';
 }

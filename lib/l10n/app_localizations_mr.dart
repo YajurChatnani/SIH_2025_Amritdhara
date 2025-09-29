@@ -358,4 +358,7 @@ class AppLocalizationsMr extends AppLocalizations {
   @override
   String get step6Point2 =>
       'शैवाल वाढ आणि डासांची पैदास रोखण्यासाठी टाकी झाकून ठेवा.';
+
+  @override
+  String get bestStructure => 'Best Structure';
 }

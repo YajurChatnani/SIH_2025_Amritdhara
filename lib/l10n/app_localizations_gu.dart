@@ -361,4 +361,7 @@ class AppLocalizationsGu extends AppLocalizations {
   @override
   String get step6Point2 =>
       'શેવાળની વૃદ્ધિ અને મચ્છરના પ્રજનનને રોકવા માટે ટાંકીને ઢાંકી રાખો.';
+
+  @override
+  String get bestStructure => 'Best Structure';
 }

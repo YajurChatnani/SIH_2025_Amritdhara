@@ -362,4 +362,7 @@ class AppLocalizationsKn extends AppLocalizations {
   @override
   String get step6Point2 =>
       'ಪಾಚಿಗಳ ಬೆಳವಣಿಗೆ ಮತ್ತು ಸೊಳ್ಳೆಗಳ ಸಂತಾನೋತ್ಪತ್ತಿಯನ್ನು ತಡೆಯಲು ಟ್ಯಾಂಕ್ ಅನ್ನು ಮುಚ್ಚಿಡಿ.';
+
+  @override
+  String get bestStructure => 'Best Structure';
 }

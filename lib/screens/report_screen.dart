@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:google_fonts/google_fonts.dart';
 
-import '../l10n/app_localizations.dart'; // IMPORT ADDED
+import '../l10n/app_localizations.dart';
 
 class ReportScreen extends StatefulWidget {
   final dynamic response;
@@ -18,12 +18,10 @@ class ReportScreen extends StatefulWidget {
 class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
-    // Get the localizations object once
     final localizations = AppLocalizations.of(context)!;
 
     if (widget.response == null) {
       return Scaffold(
-        // CHANGED
         appBar: AppBar(title: Text(localizations.error)),
         body: Center(
           child: Column(
@@ -31,7 +29,6 @@ class _ReportScreenState extends State<ReportScreen> {
             children: [
               const Icon(Icons.error, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              // CHANGED
               Text(localizations.noFeasibilityData),
             ],
           ),
@@ -57,7 +54,18 @@ class _ReportScreenState extends State<ReportScreen> {
       waterSustainabilityDays = 56;
     }
 
+    final Map<String, double> feasibilityData = {
+      "Recharge pit": 55.0,
+      "Soak pit": 60.0,
+      "Recharge Shaft": 55.0,
+      "Recharge Trench": 70.0,
+      "Recharge Garden Pit": 40.0,
+    };
+    final bestStructureEntry =
+    feasibilityData.entries.reduce((a, b) => a.value > b.value ? a : b);
+
     final reportWidgets = [
+      // Estimated Cost Card
       _InfoCard(
         gradient: const LinearGradient(
             colors: [Color(0xFFE0E0E0), Colors.white],
@@ -66,7 +74,6 @@ class _ReportScreenState extends State<ReportScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // CHANGED
             Text(localizations.estimatedCost,
                 style: TextStyle(
                     fontSize: 18,
@@ -81,6 +88,7 @@ class _ReportScreenState extends State<ReportScreen> {
           ],
         ),
       ),
+      // Overall Feasibility Card
       _InfoCard(
         gradient: const LinearGradient(
             colors: [Color(0xFFA0D2EB), Colors.white],
@@ -91,7 +99,6 @@ class _ReportScreenState extends State<ReportScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // CHANGED
                 Text(localizations.feasibility,
                     style: TextStyle(
                         fontSize: 18,
@@ -114,13 +121,14 @@ class _ReportScreenState extends State<ReportScreen> {
                       height: 12,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(6),
-                        gradient: const LinearGradient(colors: [
-                          Colors.red,
-                          Colors.orange,
-                          Colors.yellow,
-                          Colors.lightGreen,
-                          Colors.green
-                        ]),
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xfff8696b),
+                            Color(0xfffdd369),
+                            Color(0xff14c47b),
+                          ],
+                          stops: [0.0, 0.5, 1.0],
+                        ),
                       ),
                     ),
                     Positioned(
@@ -138,6 +146,44 @@ class _ReportScreenState extends State<ReportScreen> {
           ],
         ),
       ),
+      // Expandable Best Structure Card
+      _InfoCard(
+        gradient: const LinearGradient(
+            colors: [Color(0xFFA0D2EB), Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight),
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(localizations.bestStructure,
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700])),
+                const SizedBox(height: 4),
+                Text(
+                  '${bestStructureEntry.key} (${bestStructureEntry.value.toStringAsFixed(0)}%)',
+                  style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF012A4A)),
+                ),
+              ],
+            ),
+            children: <Widget>[
+              const Divider(height: 24, thickness: 0.5, color: Colors.grey),
+              ...feasibilityData.entries.map((entry) {
+                return _buildFeasibilityRow(entry.key, entry.value);
+              }).toList(),
+            ],
+          ),
+        ),
+      ),
+      // Harvest Potential Card
       _InfoCard(
         gradient: const LinearGradient(
             colors: [Color(0xFFE0E0E0), Colors.white],
@@ -146,7 +192,6 @@ class _ReportScreenState extends State<ReportScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // CHANGED
             Text(localizations.harvestPotential,
                 style: TextStyle(
                     fontSize: 18,
@@ -164,7 +209,6 @@ class _ReportScreenState extends State<ReportScreen> {
                 const SizedBox(width: 8),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),
-                  // CHANGED
                   child: Text(localizations.litresPerYear,
                       style: TextStyle(
                           fontSize: 16,
@@ -176,6 +220,7 @@ class _ReportScreenState extends State<ReportScreen> {
           ],
         ),
       ),
+      // Water Sustainability Card
       _InfoCard(
         gradient: const LinearGradient(
             colors: [Color(0xFFE0E0E0), Colors.white],
@@ -184,7 +229,6 @@ class _ReportScreenState extends State<ReportScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // CHANGED
             Text(localizations.waterSustainabilityTitle,
                 style: TextStyle(
                     fontSize: 18,
@@ -202,7 +246,6 @@ class _ReportScreenState extends State<ReportScreen> {
                 const SizedBox(width: 8),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),
-                  // CHANGED
                   child: Text(localizations.days,
                       style: TextStyle(
                           fontSize: 16,
@@ -214,39 +257,41 @@ class _ReportScreenState extends State<ReportScreen> {
           ],
         ),
       ),
+      // --- GOVERNMENT SUBSIDY CARD - NOW EXPANDABLE ---
       _InfoCard(
         gradient: const LinearGradient(
             colors: [Color(0xFFA0D2EB), Colors.white],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // CHANGED
-            Text(localizations.govtSubsidy,
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            title: Text(localizations.govtSubsidy,
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: Colors.grey[700])),
-            const SizedBox(height: 20),
-            // CHANGED
-            _buildSubsidyRow(
-                icon: Icons.energy_savings_leaf_outlined,
-                title: localizations.jalJeevanMission,
-                subsidy: '₹ 12,000',
-                onTap: () {},
-                localizations: localizations),
-            const SizedBox(height: 16),
-            // CHANGED
-            _buildSubsidyRow(
-                icon: Icons.agriculture_outlined,
-                title: localizations.pmksy,
-                subsidy: '₹ 15,000',
-                onTap: () {},
-                localizations: localizations),
-          ],
+            children: <Widget>[
+              const SizedBox(height: 12),
+              _buildSubsidyRow(
+                  icon: Icons.energy_savings_leaf_outlined,
+                  title: localizations.jalJeevanMission,
+                  subsidy: '₹ 12,000',
+                  onTap: () {},
+                  localizations: localizations),
+              const SizedBox(height: 16),
+              _buildSubsidyRow(
+                  icon: Icons.agriculture_outlined,
+                  title: localizations.pmksy,
+                  subsidy: '₹ 15,000',
+                  onTap: () {},
+                  localizations: localizations),
+            ],
+          ),
         ),
       ),
+      // Buttons
       ElevatedButton(
         onPressed: () {
           Navigator.of(context).push(
@@ -260,7 +305,6 @@ class _ReportScreenState extends State<ReportScreen> {
           padding: const EdgeInsets.symmetric(vertical: 18),
           elevation: 5,
         ),
-        // CHANGED
         child: Text(
           localizations.stepsAndInstructions,
           style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
@@ -273,7 +317,6 @@ class _ReportScreenState extends State<ReportScreen> {
             child: OutlinedButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.save_alt_rounded),
-              // CHANGED
               label: Text(localizations.saveAsPdf),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF012A4A),
@@ -291,7 +334,6 @@ class _ReportScreenState extends State<ReportScreen> {
                     .push(MaterialPageRoute(builder: (context) => const ChatScreen()));
               },
               icon: const Icon(Icons.chat_bubble_outline_rounded),
-              // CHANGED
               label: Text(localizations.askChatBot),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF4FC3F7),
@@ -331,7 +373,6 @@ class _ReportScreenState extends State<ReportScreen> {
             ),
           ),
         ),
-        // CHANGED
         title: Text(
           localizations.summaryReport,
           style: GoogleFonts.poppins(
@@ -375,7 +416,65 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  // CHANGED: Added localizations parameter
+  Widget _buildFeasibilityRow(String structure, double score) {
+    final double percentage = score / 100.0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                structure,
+                style: const TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+              Text(
+                '${score.toStringAsFixed(0)}%',
+                style:
+                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    height: 12,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xfff8696b),
+                          Color(0xfffdd369),
+                          Color(0xff14c47b),
+                        ],
+                        stops: [0.0, 0.5, 1.0],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: (constraints.maxWidth * percentage) - 18,
+                    top: -10,
+                    child: Transform.rotate(
+                      angle: math.pi,
+                      child: const Icon(Icons.arrow_drop_down,
+                          size: 40, color: Color(0xFF012A4A)),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSubsidyRow({
     required IconData icon,
     required String title,
@@ -401,7 +500,6 @@ class _ReportScreenState extends State<ReportScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 2),
-              // CHANGED
               Text('${localizations.subsidyAmount}: $subsidy',
                   style: TextStyle(fontSize: 14, color: Colors.grey[600])),
             ],
@@ -423,21 +521,17 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 }
 
-// ... The _InfoCard and _AnimatedSection widgets remain the same as they don't contain text ...
-
 class _InfoCard extends StatefulWidget {
   final Widget child;
   final Gradient gradient;
-
-  const _InfoCard({required this.child, required this.gradient});
-
+  const _InfoCard({required this.child, required this.gradient, Key? key})
+      : super(key: key);
   @override
   State<_InfoCard> createState() => _InfoCardState();
 }
 
 class _InfoCardState extends State<_InfoCard> {
   bool _isPressed = false;
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -474,16 +568,14 @@ class _InfoCardState extends State<_InfoCard> {
 class _AnimatedSection extends StatefulWidget {
   final int delay;
   final Widget child;
-
-  const _AnimatedSection({required this.delay, required this.child});
-
+  const _AnimatedSection({required this.delay, required this.child, Key? key})
+      : super(key: key);
   @override
   State<_AnimatedSection> createState() => _AnimatedSectionState();
 }
 
 class _AnimatedSectionState extends State<_AnimatedSection> {
   bool _animate = false;
-
   @override
   void initState() {
     super.initState();

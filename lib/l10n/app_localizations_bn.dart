@@ -359,4 +359,7 @@ class AppLocalizationsBn extends AppLocalizations {
   @override
   String get step6Point2 =>
       'শৈবালের বৃদ্ধি এবং মশা প্রজনন রোধ করতে ট্যাঙ্কটি ঢেকে রাখুন।';
+
+  @override
+  String get bestStructure => 'Best Structure';
 }
