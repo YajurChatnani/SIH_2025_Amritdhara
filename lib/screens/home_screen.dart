@@ -4,26 +4,31 @@ import 'package:amritdhara/screens/profile_screen.dart';
 import 'package:amritdhara/screens/user_input_screen.dart';
 import 'package:amritdhara/screens/vendor_screen.dart';
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import 'map_screen.dart';
-import 'report_screen.dart';
 import 'chat_screen.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  String getGreeting() {
+  // CHANGED: This function now requires the context to get the right language
+  String getGreeting(BuildContext context) {
     final hour = TimeOfDay.now().hour;
+    final localizations = AppLocalizations.of(context)!;
     if (hour < 12) {
-      return 'Good Morning,';
+      return localizations.goodMorning;
     } else if (hour < 17) {
-      return 'Good Afternoon,';
+      return localizations.goodAfternoon;
     } else {
-      return 'Good Evening,';
+      return localizations.goodEvening;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Get the localizations object once
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       drawer: const SettingsDrawer(),
       extendBodyBehindAppBar: true,
@@ -31,33 +36,33 @@ class HomePage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leadingWidth: 80,
-        leading: Builder(
-            builder: (context) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.7),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                      )
-                    ],
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.menu, color: Color(0xFF012A4A)),
-                    onPressed: () {
-                      Scaffold.of(context).openDrawer();
-                    },
-                  ),
-                ),
-              );
-            }
-        ),
+        leading: Builder(builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.7),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                  )
+                ],
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.menu, color: Color(0xFF012A4A)),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
+            ),
+          );
+        }),
+        // NOTE: 'AMRITDHARA' is a brand name, usually not translated.
+        // If you want to translate it, add a key and use: localizations.amritdharaTitle
         title: Text(
-          'AMRITDHARA',
+          localizations.amritdharaTitle,
           style: TextStyle(
             color: const Color(0xFF012A4A),
             fontWeight: FontWeight.w900,
@@ -78,7 +83,8 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.only(right: 16.0),
             child: GestureDetector(
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ProfileScreen()));
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => ProfileScreen()));
               },
               child: Container(
                 padding: const EdgeInsets.all(6),
@@ -113,15 +119,24 @@ class HomePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: kToolbarHeight + MediaQuery.of(context).padding.top + 10),
-                Text(getGreeting(), style: const TextStyle(fontSize: 22, color: Colors.black54)),
-                const Text('John', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF012A4A))),
+                SizedBox(
+                    height: kToolbarHeight + MediaQuery.of(context).padding.top + 10),
+                // CHANGED
+                Text(getGreeting(context),
+                    style: const TextStyle(fontSize: 22, color: Colors.black54)),
+                // NOTE: User's name is dynamic data, so it is not translated.
+                const Text('John',
+                    style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF012A4A))),
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const PolygonMapScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const PolygonMapScreen()),
                     );
                   },
                   child: Container(
@@ -129,22 +144,35 @@ class HomePage extends StatelessWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(25.0),
                       border: Border.all(color: const Color(0xFF012A4A), width: 3),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), spreadRadius: 3, blurRadius: 15, offset: const Offset(0, 8))],
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 3,
+                            blurRadius: 15,
+                            offset: const Offset(0, 8))
+                      ],
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(22.0),
-                      child: Image.asset('assets/images/map.png', fit: BoxFit.cover, height: 180, width: double.infinity),
+                      child: Image.asset('assets/images/map.png',
+                          fit: BoxFit.cover, height: 180, width: double.infinity),
                     ),
                   ),
                 ),
                 const SizedBox(height: 30),
-                _buildTipCard(),
+                _buildTipCard(localizations), // Pass localizations
                 const SizedBox(height: 30),
                 Row(
                   children: [
-                    Container(width: 5, height: 28, color: const Color(0xFF012A4A)),
+                    Container(
+                        width: 5, height: 28, color: const Color(0xFF012A4A)),
                     const SizedBox(width: 10),
-                    const Text('QUICK ACCESS', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+                    // CHANGED
+                    Text(localizations.quickAccess,
+                        style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2)),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -154,21 +182,35 @@ class HomePage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _QuickAccessCard(
-                          text: 'USER INPUT',
+                          // CHANGED
+                          text: localizations.userInput,
                           icon: Icons.assignment_outlined,
-                          gradient: const LinearGradient(colors: [Color(0xFF4CAF50), Color(0xFFC8E6C9)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                          gradient: const LinearGradient(colors: [
+                            Color(0xFF4CAF50),
+                            Color(0xFFC8E6C9)
+                          ], begin: Alignment.centerLeft, end: Alignment.centerRight),
                           textColor: const Color(0xFF1B5E20),
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const UserInputScreen()));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const UserInputScreen()));
                           },
                         ),
                         _QuickAccessCard(
-                          text: 'VENDOR',
+                          // CHANGED
+                          text: localizations.vendor,
                           icon: Icons.storefront_outlined,
-                          gradient: const LinearGradient(colors: [Color(0xFFE91E63), Color(0xFFF8BBD0)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                          gradient: const LinearGradient(colors: [
+                            Color(0xFFE91E63),
+                            Color(0xFFF8BBD0)
+                          ], begin: Alignment.centerLeft, end: Alignment.centerRight),
                           textColor: const Color(0xFF880E4F),
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const VendorsScreen()));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const VendorsScreen()));
                           },
                         ),
                       ],
@@ -178,21 +220,35 @@ class HomePage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _QuickAccessCard(
-                          text: 'CHAT BOT',
+                          // CHANGED
+                          text: localizations.chatBot,
                           icon: Icons.chat_bubble_outline,
-                          gradient: const LinearGradient(colors: [Color(0xFFFFB74D), Color(0xFFFFE0B2)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                          gradient: const LinearGradient(colors: [
+                            Color(0xFFFFB74D),
+                            Color(0xFFFFE0B2)
+                          ], begin: Alignment.centerLeft, end: Alignment.centerRight),
                           textColor: const Color(0xFFE65100),
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatScreen()));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const ChatScreen()));
                           },
                         ),
                         _QuickAccessCard(
-                          text: 'GEOWATER\nDATA',
+                          // CHANGED
+                          text: localizations.geoWaterData,
                           icon: Icons.info_outline,
-                          gradient: const LinearGradient(colors: [Color(0xFF4FC3F7), Color(0xFFE1F5FE)], begin: Alignment.centerLeft, end: Alignment.centerRight),
+                          gradient: const LinearGradient(colors: [
+                            Color(0xFF4FC3F7),
+                            Color(0xFFE1F5FE)
+                          ], begin: Alignment.centerLeft, end: Alignment.centerRight),
                           textColor: const Color(0xFF01579B),
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const GeowaterDataScreen()));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const GeowaterDataScreen()));
                           },
                         ),
                       ],
@@ -202,13 +258,19 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 30),
                 Row(
                   children: [
-                    Container(width: 5, height: 28, color: const Color(0xFF012A4A)),
+                    Container(
+                        width: 5, height: 28, color: const Color(0xFF012A4A)),
                     const SizedBox(width: 10),
-                    const Text('PEOPLE ALSO ASK', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+                    // CHANGED
+                    Text(localizations.peopleAlsoAsk,
+                        style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2)),
                   ],
                 ),
                 const SizedBox(height: 16),
-                _buildFaqCard(),
+                _buildFaqCard(localizations), // Pass localizations
                 const SizedBox(height: 20),
               ],
             ),
@@ -218,7 +280,8 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildTipCard() {
+  // CHANGED: Added localizations parameter
+  Widget _buildTipCard(AppLocalizations localizations) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -245,9 +308,17 @@ class HomePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Tip of the Day', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.orange.shade900)),
+                // CHANGED
+                Text(localizations.tipOfTheDay,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.orange.shade900)),
                 const SizedBox(height: 4),
-                Text('Check your home for leaks. Even a small drip can waste thousands of litres a year!', style: TextStyle(fontSize: 14, color: Colors.brown.shade800)),
+                // CHANGED
+                Text(localizations.tipOfTheDayBody,
+                    style: TextStyle(
+                        fontSize: 14, color: Colors.brown.shade800)),
               ],
             ),
           ),
@@ -256,7 +327,8 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildFaqCard() {
+  // CHANGED: Added localizations parameter
+  Widget _buildFaqCard(AppLocalizations localizations) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -275,9 +347,10 @@ class HomePage extends StatelessWidget {
         child: ExpansionTile(
           iconColor: const Color(0xFF012A4A),
           collapsedIconColor: const Color(0xFF012A4A),
-          title: const Text(
-            'How does rooftop rainwater harvesting help recharge groundwater?',
-            style: TextStyle(
+          // CHANGED
+          title: Text(
+            localizations.faqTitle1,
+            style: const TextStyle(
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
@@ -285,10 +358,11 @@ class HomePage extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
+              // CHANGED
               child: Text(
-                'It collects rainwater from your roof and directs it into the ground through specially designed systems like recharge pits or wells. This process actively replenishes underground aquifers, helping to raise the water table.',
+                localizations.faqBody1,
                 textAlign: TextAlign.justify,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black54,
                   fontSize: 14,
                   height: 1.5,
@@ -321,6 +395,7 @@ class _QuickAccessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ... This widget does not need changes as it receives the text
     final screenWidth = MediaQuery.of(context).size.width;
     final defaultCardWidth = (screenWidth - (16 * 2) - 16) / 2;
     final actualWidth = width ?? defaultCardWidth;

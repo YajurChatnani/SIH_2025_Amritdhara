@@ -1,5 +1,8 @@
+import 'package:amritdhara/providers/locale_provider.dart';
 import 'package:amritdhara/screens/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 
 class SettingsDrawer extends StatefulWidget {
   const SettingsDrawer({super.key});
@@ -9,17 +12,15 @@ class SettingsDrawer extends StatefulWidget {
 }
 
 class _SettingsDrawerState extends State<SettingsDrawer> {
-  // State for the dark mode toggle switch
   bool _isDarkMode = true;
 
   @override
   Widget build(BuildContext context) {
-    // The Drawer widget is the root of the sidebar UI
+    // Access the provider to change the language
+    final provider = Provider.of<LocaleProvider>(context, listen: false);
+
     return Drawer(
-      width:
-          MediaQuery.of(context).size.width *
-          0.85, // Takes up 85% of screen width
-      // Apply a custom shape with rounded corners on the right
+      width: MediaQuery.of(context).size.width * 0.85,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topRight: Radius.circular(30),
@@ -27,7 +28,6 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
         ),
       ),
       child: Container(
-        // The gradient background that covers the entire drawer
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFFB8E2FF), Colors.white],
@@ -47,7 +47,6 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Back button to close the drawer
                     Container(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
@@ -66,33 +65,28 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
-                    // Title
-                    const Text(
-                      'Settings',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)!.settings,
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w900,
                         color: Colors.black87,
                         letterSpacing: 0.3,
                       ),
                     ),
-                    // Spacer to keep the title centered
                     const SizedBox(width: 48),
                   ],
                 ),
               ),
               const Divider(color: Colors.black87, height: 0.5, thickness: 0.5),
-
               const SizedBox(height: 13),
-
-              // List of settings items
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   children: [
                     _buildSettingsItem(
                       icon: Icons.brightness_6,
-                      title: 'Mode',
+                      title: AppLocalizations.of(context)!.mode,
                       subtitle: 'Dark & Light',
                       trailing: Switch(
                         value: _isDarkMode,
@@ -105,36 +99,65 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
                         activeColor: const Color(0xFF1976D2),
                       ),
                     ),
+                    // --- THIS IS THE UPDATED SECTION ---
                     _buildSettingsItem(
                       icon: Icons.language,
-                      title: 'Language',
-                      onTap: () {},
+                      title: AppLocalizations.of(context)!.language,
+                      trailing: PopupMenuButton(
+                        onSelected: (Locale locale) {
+                          provider.setLocale(locale);
+                        },
+                        itemBuilder: (BuildContext context) {
+                          // Map of language codes to their native names
+                          const languageMap = {
+                            'en': 'English',
+                            'hi': 'हिंदी',
+                            'bn': 'বাংলা',
+                            'ta': 'தமிழ்',
+                            'te': 'తెలుగు',
+                            'mr': 'मराठी',
+                            'gu': 'ગુજરાતી',
+                            'kn': 'ಕನ್ನಡ',
+                          };
+
+                          return L10n.all.map((locale) {
+                            return PopupMenuItem(
+                              value: locale,
+                              child: Text(languageMap[locale.languageCode] ?? locale.languageCode),
+                            );
+                          }).toList();
+                        },
+                        icon: const Icon(
+                          Icons.arrow_forward_ios,
+                          color: Color(0xFF1568EC),
+                          size: 18,
+                        ),
+                      ),
                     ),
+                    // --- END OF UPDATED SECTION ---
                     _buildSettingsItem(
                       icon: Icons.star_border,
-                      title: 'Rate This App',
+                      title: AppLocalizations.of(context)!.rateApp,
                       onTap: () {},
                     ),
                     _buildSettingsItem(
                       icon: Icons.info_outline,
-                      title: 'Terms & Conditions',
+                      title: AppLocalizations.of(context)!.terms,
                       onTap: () {},
                     ),
                     _buildSettingsItem(
                       icon: Icons.lock_outline,
-                      title: 'Privacy Policy',
+                      title: AppLocalizations.of(context)!.privacy,
                       onTap: () {},
                     ),
                     _buildSettingsItem(
                       icon: Icons.share,
-                      title: 'Share This App',
+                      title: AppLocalizations.of(context)!.shareApp,
                       onTap: () {},
                     ),
                   ],
                 ),
               ),
-
-              // Logout Button
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 80.0,
@@ -142,7 +165,8 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
                 ),
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>LoginScreen()));
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => const LoginScreen()));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6B6B),
@@ -155,9 +179,9 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
                     minimumSize: const Size(double.infinity, 50),
                   ),
                   child: Center(
-                    child: const Text(
-                      'Logout',
-                      style: TextStyle(
+                    child: Text(
+                      AppLocalizations.of(context)!.logout,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -166,13 +190,11 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
                   ),
                 ),
               ),
-
-              // Footer text
-              const Padding(
-                padding: EdgeInsets.only(bottom: 20.0),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
                 child: Text(
-                  'Made by Amritdhara',
-                  style: TextStyle(color: Color(0xFF0D47A1), fontSize: 14),
+                  AppLocalizations.of(context)!.madeBy,
+                  style: const TextStyle(color: Color(0xFF0D47A1), fontSize: 14),
                 ),
               ),
             ],
@@ -182,7 +204,6 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
     );
   }
 
-  // A helper widget to build each item in the settings list
   Widget _buildSettingsItem({
     required IconData icon,
     required String title,
@@ -190,10 +211,11 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
     Widget? trailing,
     VoidCallback? onTap,
   }) {
+    // ... (This helper widget remains the same)
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 0,
-      color: Colors.transparent, // Make card transparent to show gradient
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(15),
@@ -201,12 +223,11 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-              // Circular Icon
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [Color(0xCA1198B8), Color(0xFF0D648C)],
                     stops: [0.2, 0.9],
                     begin: Alignment.topLeft,
@@ -216,7 +237,6 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
                 child: Icon(icon, color: Colors.white, size: 24),
               ),
               const SizedBox(width: 16),
-              // Title and Subtitle
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,7 +252,7 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
                     if (subtitle != null)
                       Text(
                         subtitle,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           color: Colors.black87,
                           fontWeight: FontWeight.w400,
@@ -241,7 +261,6 @@ class _SettingsDrawerState extends State<SettingsDrawer> {
                   ],
                 ),
               ),
-              // Trailing widget (Switch or Arrow)
               if (trailing != null)
                 trailing
               else
