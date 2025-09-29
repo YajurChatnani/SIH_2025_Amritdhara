@@ -1,10 +1,11 @@
-// lib/screens/report_screen.dart
+import 'package:amritdhara/screens/chat_screen.dart';
+import 'package:amritdhara/screens/steps_and_instructions/structure_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:google_fonts/google_fonts.dart';
 
 class ReportScreen extends StatefulWidget {
-  final response;
+  final dynamic response;
 
   const ReportScreen({super.key, this.response});
 
@@ -15,7 +16,6 @@ class ReportScreen extends StatefulWidget {
 class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
-    // Handle null response
     if (widget.response == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Error')),
@@ -26,30 +26,32 @@ class _ReportScreenState extends State<ReportScreen> {
               Icon(Icons.error, size: 64, color: Colors.red),
               SizedBox(height: 16),
               Text('No feasibility data available'),
-              Text('Please try again'),
             ],
           ),
         ),
       );
     }
 
-    // Get the best feasibility score from the response
-    // Get the structure map from response
-    final Map<String, double> structureScores = widget.response!.structureScores;
-
-    // Find the structure with the highest score
+    final Map<String, double> structureScores = widget.response.structureScores;
     final MapEntry<String, double> bestEntry =
     structureScores.entries.reduce((a, b) => a.value > b.value ? a : b);
 
-    // Extract best structure and score
-    final String bestStructure = bestEntry.key;
     final double bestfeasibilityScore = bestEntry.value;
-    final double feasibilityPercentage = bestfeasibilityScore / 100.0; // Convert to 0-1 range for positioning
-    final int costEstimate_low = widget.response!.costEstimate_low;
-    final int costEstimate_high = widget.response!.costEstimate_high;
-    final int annual_harvest_potential = widget.response!.annual_harvest_potential;
+    final double feasibilityPercentage = bestfeasibilityScore / 100.0;
+    final int costEstimate_low = widget.response.costEstimate_low;
+    final int costEstimate_high = widget.response.costEstimate_high;
+    final int annual_harvest_potential = widget.response.annual_harvest_potential;
 
-    final reportCards = [
+    // Safely get the new field with a hardcoded default
+    int waterSustainabilityDays;
+    try {
+      waterSustainabilityDays = widget.response.water_sustainability_days;
+    } catch (e) {
+      waterSustainabilityDays = 56; // Hardcoded default
+    }
+
+    // --- MODIFIED: Added new cards and buttons to this list ---
+    final reportWidgets = [
       _InfoCard(
         gradient: const LinearGradient(colors: [Color(0xFFE0E0E0), Colors.white], begin: Alignment.topLeft, end: Alignment.bottomRight),
         child: Column(
@@ -57,8 +59,7 @@ class _ReportScreenState extends State<ReportScreen> {
           children: [
             Text('Estimated Cost', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[700])),
             const SizedBox(height: 8),
-
-            Text('₹ ${costEstimate_low.toStringAsFixed(0)} - ${costEstimate_high.toStringAsFixed(0)} /- ', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
+            Text('₹ ${costEstimate_low} - ${costEstimate_high} /- ', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
           ],
         ),
       ),
@@ -95,7 +96,6 @@ class _ReportScreenState extends State<ReportScreen> {
                 );
               },
             ),
-
           ],
         ),
       ),
@@ -109,11 +109,33 @@ class _ReportScreenState extends State<ReportScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('${annual_harvest_potential.toStringAsFixed(0)}', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
+                Text('$annual_harvest_potential', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
                 const SizedBox(width: 8),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),
                   child: Text('Litres/Year', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      // --- NEW CARD ADDED ---
+      _InfoCard(
+        gradient: const LinearGradient(colors: [Color(0xFFE0E0E0), Colors.white], begin: Alignment.topLeft, end: Alignment.bottomRight),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('How long can your harvested water last?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[700])),
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(waterSustainabilityDays.toString(), style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.grey[850])),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Text('Days', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[600])),
                 ),
               ],
             ),
@@ -129,23 +151,60 @@ class _ReportScreenState extends State<ReportScreen> {
             const SizedBox(height: 20),
             _buildSubsidyRow(icon: Icons.energy_savings_leaf_outlined, title: 'Jal Jeevan Mission', subsidy: '₹ 12,000', onTap: () {}),
             const SizedBox(height: 16),
-            _buildSubsidyRow(icon: Icons.agriculture_outlined, title: 'Pradhan Mantri Krishi Sinchai Yojana (PMKSY)', subsidy: '₹ 15,000', onTap: () {}),
+            _buildSubsidyRow(icon: Icons.agriculture_outlined, title: 'PM Krishi Sinchai Yojana (PMKSY)', subsidy: '₹ 15,000', onTap: () {}),
           ],
         ),
       ),
-      Center(
-        child: ElevatedButton.icon(
-          onPressed: () {},
-          icon: const Icon(Icons.save_alt_rounded, size: 20),
-          label: const Text('Save as PDF', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue.shade100,
-            foregroundColor: const Color(0xFF012A4A),
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-            shape: const StadiumBorder(),
-            elevation: 4,
-          ),
+      // --- NEW BUTTONS ADDED ---
+      ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context)=>StructureScreen()));
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF012A4A),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          elevation: 5,
         ),
+        child: Text(
+          'Step & instructions',
+          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      ),
+      const SizedBox(height: 16),
+      Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.save_alt_rounded),
+              label: const Text('Save as PDF'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF012A4A),
+                side: const BorderSide(color: Color(0xFF012A4A), width: 2),
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ChatScreen()));
+              },
+              icon: const Icon(Icons.chat_bubble_outline_rounded),
+              label: const Text('Ask chat bot'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4FC3F7),
+                foregroundColor: Colors.white,
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+          ),
+        ],
       ),
     ];
 
@@ -170,20 +229,12 @@ class _ReportScreenState extends State<ReportScreen> {
             ),
           ),
         ),
-        title: ShaderMask(
-          blendMode: BlendMode.srcIn,
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [Color(0xFF42A5F5), Color(0xFF0D47A1)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
-          child: Text(
-            'SUMMARY REPORT',
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w800,
-              fontSize: 22,
-              shadows: [const Shadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 2))],
-            ),
+        title: Text(
+          'SUMMARY REPORT',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w800,
+            fontSize: 22,
+            color: const Color(0xFF0D47A1),
           ),
         ),
         centerTitle: true,
@@ -206,13 +257,13 @@ class _ReportScreenState extends State<ReportScreen> {
             right: 16,
             bottom: 20,
           ),
-          itemCount: reportCards.length,
+          itemCount: reportWidgets.length,
           itemBuilder: (context, index) {
             return _AnimatedSection(
               delay: 150 * (index + 1),
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 24.0),
-                child: reportCards[index],
+                child: reportWidgets[index],
               ),
             );
           },
@@ -221,7 +272,6 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  // --- FIXED: Full code for the helper widget is now included ---
   Widget _buildSubsidyRow({
     required IconData icon,
     required String title,
