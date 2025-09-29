@@ -56,16 +56,6 @@ class _ReportScreenState extends State<ReportScreen> {
     final bestStructureEntry =
     feasibilityData.entries.reduce((a, b) => a.value > b.value ? a : b);
 
-    final Map<String, double> feasibilityData = {
-      "Recharge pit": 55.0,
-      "Soak pit": 60.0,
-      "Recharge Shaft": 55.0,
-      "Recharge Trench": 70.0,
-      "Recharge Garden Pit": 40.0,
-    };
-    final bestStructureEntry =
-    feasibilityData.entries.reduce((a, b) => a.value > b.value ? a : b);
-
     final reportWidgets = [
       // Estimated Cost Card
       _InfoCard(
@@ -103,7 +93,7 @@ class _ReportScreenState extends State<ReportScreen> {
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: Colors.grey[700])),
-                Text('${bestfeasibilityScore.toStringAsFixed(0)}%',
+                Text('${bestFeasibilityScore.toStringAsFixed(0)}%',
                     style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -143,43 +133,6 @@ class _ReportScreenState extends State<ReportScreen> {
               },
             ),
           ],
-        ),
-      ),
-      // Expandable Best Structure Card
-      _InfoCard(
-        gradient: const LinearGradient(
-            colors: [Color(0xFFA0D2EB), Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight),
-        child: Theme(
-          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-            tilePadding: EdgeInsets.zero,
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(localizations.bestStructure,
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700])),
-                const SizedBox(height: 4),
-                Text(
-                  '${bestStructureEntry.key} (${bestStructureEntry.value.toStringAsFixed(0)}%)',
-                  style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF012A4A)),
-                ),
-              ],
-            ),
-            children: <Widget>[
-              const Divider(height: 24, thickness: 0.5, color: Colors.grey),
-              ...feasibilityData.entries.map((entry) {
-                return _buildFeasibilityRow(entry.key, entry.value);
-              }).toList(),
-            ],
-          ),
         ),
       ),
       // Harvest Potential Card
@@ -235,7 +188,7 @@ class _ReportScreenState extends State<ReportScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('$annual_harvest_potential',
+                Text('$annualHarvestPotential',
                     style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
