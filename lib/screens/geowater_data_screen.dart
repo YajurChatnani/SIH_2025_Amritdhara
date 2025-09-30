@@ -176,7 +176,8 @@ class _GeowaterDataScreenState extends State<GeowaterDataScreen> {
                   delay: 200,
                   child: _buildPincodeInput(context),
                 ),
-                const SizedBox(height: 24),
+                // MODIFIED: Reduced the spacing even more
+                //const SizedBox(height: 8),
                 _AnimatedFadeIn(
                   delay: 400,
                   child: GridView.count(

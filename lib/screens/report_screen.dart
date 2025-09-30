@@ -36,21 +36,32 @@ class _ReportScreenState extends State<ReportScreen> {
     }
 
     // Data from the backend response
-    final Map<String, double> structureScores = Map<String, double>.from(widget.response.structureScores);
+    final Map<String, double> structureScores =
+    Map<String, double>.from(widget.response.structureScores);
     final MapEntry<String, double> bestEntry =
     structureScores.entries.reduce((a, b) => a.value > b.value ? a : b);
 
     final double bestFeasibilityScore = bestEntry.value;
-    final double feasibilityPercentage = bestFeasibilityScore / 100.0;
     final int costEstimateLow = widget.response.costEstimateLow;
     final int costEstimateHigh = widget.response.costEstimateHigh;
     final int annualHarvestPotential = widget.response.annualHarvestPotential;
     final int waterSustainabilityDays = widget.response.waterSustainabilityDays;
 
+    // Define gradients for consistency
+    const silverGradient = LinearGradient(
+        colors: [Color(0xFFE0E0E0), Colors.white],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight);
+
+    const blueGradient = LinearGradient(
+        colors: [Color(0xFFA0D2EB), Colors.white],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight);
+
     final reportWidgets = [
       // Estimated Cost Card
       _InfoCard(
-        gradient: const LinearGradient(colors: [Color(0xFFE0E0E0), Colors.white], begin: Alignment.topLeft, end: Alignment.bottomRight),
+        gradient: silverGradient,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -69,12 +80,9 @@ class _ReportScreenState extends State<ReportScreen> {
         ),
       ),
 
-      // MODIFIED: Combined Best Structure & Feasibility Card
+      // Best Structure & Feasibility Card
       _InfoCard(
-        gradient: const LinearGradient(
-            colors: [Color(0xFFA0D2EB), Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight),
+        gradient: blueGradient,
         child: Theme(
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
@@ -89,66 +97,14 @@ class _ReportScreenState extends State<ReportScreen> {
                         color: Colors.grey[700])),
                 const SizedBox(height: 4),
                 Text(
-                  '${bestEntry.key} (${bestEntry.value.toStringAsFixed(0)}%)',
+                  bestEntry.key,
                   style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF012A4A)),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  '${localizations.feasibility} of ${bestEntry.key}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF012A4A),
-                  ),
-                ),
                 const SizedBox(height: 12),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          height: 12,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(6),
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xfff8696b),
-                                Color(0xfffdd369),
-                                Color(0xff14c47b),
-                              ],
-                              stops: [0.0, 0.5, 1.0],
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: (constraints.maxWidth * feasibilityPercentage) - 18,
-                          top: -10,
-                          child: Transform.rotate(
-                              angle: math.pi,
-                              child: const Icon(Icons.arrow_drop_down,
-                                  size: 40, color: Color(0xFF012A4A))),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 4),
-                // MODIFIED: Shows only the percentage, in bold
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    '${bestEntry.value.toStringAsFixed(0)}%',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                ),
+                _FeasibilityScale(score: bestFeasibilityScore),
               ],
             ),
             children: <Widget>[
@@ -163,7 +119,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
       // Harvest Potential Card
       _InfoCard(
-        gradient: const LinearGradient(colors: [Color(0xFFE0E0E0), Colors.white], begin: Alignment.topLeft, end: Alignment.bottomRight),
+        gradient: silverGradient,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -198,7 +154,8 @@ class _ReportScreenState extends State<ReportScreen> {
 
       // Water Sustainability Card
       _InfoCard(
-        gradient: const LinearGradient(colors: [Color(0xFFE0E0E0), Colors.white], begin: Alignment.topLeft, end: Alignment.bottomRight),
+        // MODIFIED: Changed to blue gradient
+        gradient: blueGradient,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -233,10 +190,8 @@ class _ReportScreenState extends State<ReportScreen> {
 
       // Government Subsidy Card
       _InfoCard(
-        gradient: const LinearGradient(
-            colors: [Color(0xFFA0D2EB), Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight),
+        // MODIFIED: Changed to silver gradient
+        gradient: silverGradient,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -302,8 +257,8 @@ class _ReportScreenState extends State<ReportScreen> {
           Expanded(
             child: ElevatedButton.icon(
               onPressed: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) => const ChatScreen()));
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const ChatScreen()));
               },
               icon: const Icon(Icons.chat_bubble_outline_rounded),
               label: Text(localizations.askChatBot),
@@ -389,59 +344,20 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   Widget _buildFeasibilityRow(String structure, double score) {
-    final double percentage = score / 100.0;
-
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                structure,
-                style: const TextStyle(fontSize: 16, color: Colors.black87),
-              ),
-              Text(
-                '${score.toStringAsFixed(0)}%',
-                style:
-                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ],
+          Text(
+            structure,
+            style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+                fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 18),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              return Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    height: 12,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xfff8696b),
-                          Color(0xfffdd369),
-                          Color(0xff14c47b),
-                        ],
-                        stops: [0.0, 0.5, 1.0],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: (constraints.maxWidth * percentage) - 18,
-                    top: -10,
-                    child: Transform.rotate(
-                      angle: math.pi,
-                      child: const Icon(Icons.arrow_drop_down,
-                          size: 40, color: Color(0xFF012A4A)),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
+          const SizedBox(height: 12),
+          _FeasibilityScale(score: score),
         ],
       ),
     );
@@ -493,7 +409,7 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 }
 
-// ... The _InfoCard and _AnimatedSection widgets remain the same ...
+// ... _InfoCard and _AnimatedSection widgets remain the same ...
 
 class _InfoCard extends StatefulWidget {
   final Widget child;
@@ -580,5 +496,114 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
         child: widget.child,
       ),
     );
+  }
+}
+
+// FeasibilityScale widget with the corrected tooltip
+class _FeasibilityScale extends StatelessWidget {
+  final double score;
+
+  const _FeasibilityScale({required this.score});
+
+  LinearGradient _getGradientForScore(double score) {
+    if (score < 40) {
+      return LinearGradient(
+        colors: [Colors.red.shade200, Colors.red.shade500],
+      );
+    } else if (score < 70) {
+      return LinearGradient(
+        colors: [Colors.yellow.shade400, Colors.orange.shade600],
+      );
+    } else {
+      return LinearGradient(
+        colors: [Colors.green.shade300, Colors.green.shade600],
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final percentage = score / 100.0;
+    const tooltipWidth = 55.0;
+    const tooltipHeight = 28.0;
+    const arrowHeight = 10.0;
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final double leftPosition =
+          (constraints.maxWidth * percentage) - (tooltipWidth / 2);
+
+      return Container(
+        padding: const EdgeInsets.only(top: tooltipHeight + arrowHeight - 2),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Background Track
+            Container(
+              height: 10,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(5),
+              ),
+            ),
+            // Progress Fill
+            FractionallySizedBox(
+              widthFactor: percentage,
+              child: Container(
+                height: 10,
+                decoration: BoxDecoration(
+                  gradient: _getGradientForScore(score),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+            ),
+            // Tooltip Thumb
+            Positioned(
+              top: -tooltipHeight - arrowHeight,
+              left: leftPosition.clamp(
+                  0.0, constraints.maxWidth - tooltipWidth),
+              child: SizedBox(
+                width: tooltipWidth,
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Positioned(
+                      bottom: 0,
+                      child: Icon(
+                        Icons.arrow_drop_down,
+                        color: const Color(0xFF012A4A),
+                        size: 20,
+                      ),
+                    ),
+                    Container(
+                      height: tooltipHeight,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF012A4A),
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 5,
+                            offset: const Offset(0, 2),
+                          )
+                        ],
+                      ),
+                      child: Text(
+                        '${score.toStringAsFixed(0)}%',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
