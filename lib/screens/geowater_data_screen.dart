@@ -2,11 +2,110 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui'; // Required for the BackdropFilter (glass effect)
+import 'dart:async'; // Required for Timer
+import '../rainwater_backend/data_fetch.dart'; // Import data_fetch.dart
 
 import '../l10n/app_localizations.dart';
 
-class GeowaterDataScreen extends StatelessWidget {
+class GeowaterDataScreen extends StatefulWidget {
   const GeowaterDataScreen({super.key});
+
+  @override
+  _GeowaterDataScreenState createState() => _GeowaterDataScreenState();
+}
+
+class _GeowaterDataScreenState extends State<GeowaterDataScreen> {
+  final TextEditingController _pincodeController = TextEditingController();
+  String _groundwaterLevel = '< 5m (High)';
+  String _soilTexture = 'Black Cotton';
+  String _rainfall = '500-1000 mm';
+  Timer? _debounceTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize CSV data when the screen loads
+    initializeCsvData();
+  }
+
+  @override
+  void dispose() {
+    _pincodeController.dispose();
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  // Fetch data based on pincode and update state
+  void _onPincodeChanged(String value) {
+    // Cancel any existing timer
+    _debounceTimer?.cancel();
+
+    // Trigger only when pincode length is exactly 6
+    if (value.length == 6) {
+      _debounceTimer = Timer(const Duration(seconds: 2), () async {
+        try {
+          // Fetch location data from pincode
+          final location = await getLocationFromPincode(value);
+          if (location != null) {
+            final district = location['district'];
+            final state = location['state'];
+
+            // Fetch rainfall data from district
+            final rainfallData = await getPredictionsFromDistrict(district!);
+            print('rainfall= $rainfallData');
+            // Fetch soil texture from state
+            final soilData = await getSoilTextureFromState(state!);
+
+            // Fetch groundwater level from state
+            final gwlData = await getGwlFromState(state);
+
+            setState(() {
+              // Update rainfall (using annual monsoon rainfall)
+              if (rainfallData != null &&
+                  rainfallData['annual_monsoon_rainfall'] != null) {
+                final rainfallValue = double.tryParse(
+                    rainfallData['annual_monsoon_rainfall']!.toString());
+                _rainfall = rainfallValue != null
+                    ? '${rainfallValue.toInt()} mm'
+                    : '500-1000 mm';
+                print('Parsed rainfall: $_rainfall');
+              } else {
+                _rainfall = '500-1000 mm';
+                print('Rainfall data missing, using fallback: $_rainfall');
+              }
+              // _rainfall = rainfallData != null
+              //     ? '${int.tryParse(double.tryParse(rainfallData['annual_monsoon_rainfall'] ?? '500').toString()) ?? 500} mm'
+              //     : '500-1000 mm'; // Fallback value
+              // Update soil texture
+              _soilTexture = soilData != null
+                  ? soilData['soil_texture']!
+                  : 'Black Cotton'; // Fallback value
+
+              // Update groundwater level
+              _groundwaterLevel = gwlData != null
+                  ? '< ${double.tryParse(gwlData['gwl'] ?? '5')?.toStringAsFixed(0) ?? '5'} m'
+                  : '< 5m (High)'; // Fallback value
+            });
+          } else {
+            setState(() {
+              // Reset to default values if pincode not found
+              _rainfall = '500-1000 mm';
+              _soilTexture = 'Black Cotton';
+              _groundwaterLevel = '< 5m (High)';
+            });
+          }
+        } catch (e) {
+          print('Error fetching data: $e');
+          setState(() {
+            // Reset to default values on error
+            _rainfall = '500-1000 mm';
+            _soilTexture = 'Black Cotton';
+            _groundwaterLevel = '< 5m (High)';
+          });
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +190,7 @@ class GeowaterDataScreen extends StatelessWidget {
                       _buildDataCard(
                         icon: Icons.terrain_outlined,
                         label: AppLocalizations.of(context)!.soil,
-                        value: 'Black Cotton',
+                        value: _soilTexture,
                         gradient: const LinearGradient(
                           colors: [Color(0xFF8D6E63), Color(0xFFA1887F)],
                           begin: Alignment.topLeft,
@@ -101,7 +200,7 @@ class GeowaterDataScreen extends StatelessWidget {
                       _buildDataCard(
                         icon: Icons.water_drop_outlined,
                         label: AppLocalizations.of(context)!.rainfall,
-                        value: '500-1000 mm',
+                        value: _rainfall,
                         gradient: const LinearGradient(
                           colors: [Color(0xFF29B6F6), Color(0xFF4FC3F7)],
                           begin: Alignment.topLeft,
@@ -111,7 +210,7 @@ class GeowaterDataScreen extends StatelessWidget {
                       _buildDataCard(
                         icon: Icons.layers_outlined,
                         label: AppLocalizations.of(context)!.groundwater,
-                        value: '< 5m (High)',
+                        value: _groundwaterLevel,
                         gradient: const LinearGradient(
                           colors: [Color(0xFF4DB6AC), Color(0xFF80CBC4)],
                           begin: Alignment.topLeft,
@@ -145,7 +244,6 @@ class GeowaterDataScreen extends StatelessWidget {
   }
 
   Widget _buildPincodeInput(BuildContext context) {
-    // ... (This widget is unchanged)
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
@@ -157,11 +255,13 @@ class GeowaterDataScreen extends StatelessWidget {
             border: Border.all(color: Colors.white.withOpacity(0.2)),
           ),
           child: TextField(
+            controller: _pincodeController,
             keyboardType: TextInputType.number,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(6),
             ],
+            onChanged: _onPincodeChanged,
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -184,7 +284,6 @@ class GeowaterDataScreen extends StatelessWidget {
     );
   }
 
-  // --- THIS WIDGET IS NOW FIXED ---
   Widget _buildDataCard({
     required IconData icon,
     required String label,
@@ -202,7 +301,6 @@ class GeowaterDataScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(25),
             border: Border.all(color: Colors.white.withOpacity(0.2)),
           ),
-          // CHANGED: Wrapped Column in a SingleChildScrollView
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
@@ -250,7 +348,6 @@ class GeowaterDataScreen extends StatelessWidget {
   }
 
   Widget _buildAquiferCard(BuildContext context) {
-    // ... (This widget is unchanged)
     const String imagePath = 'assets/images/aquifier.png';
 
     return ClipRRect(
@@ -339,7 +436,6 @@ class GeowaterDataScreen extends StatelessWidget {
 }
 
 class FullScreenImageViewer extends StatelessWidget {
-  // ... (This widget is unchanged)
   final String imageAssetPath;
 
   const FullScreenImageViewer({super.key, required this.imageAssetPath});
@@ -368,7 +464,6 @@ class FullScreenImageViewer extends StatelessWidget {
 }
 
 class _AnimatedFadeIn extends StatefulWidget {
-  // ... (This widget is unchanged)
   final int delay;
   final Widget child;
 
