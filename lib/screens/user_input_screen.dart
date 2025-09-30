@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui'; // Needed for the blur effect
+import '../l10n/app_localizations.dart';
 import './report_screen.dart';
-
-
 import '../rainwater_backend/data_fetch.dart';
-
 
 class UserInputScreen extends StatefulWidget {
   const UserInputScreen({super.key});
@@ -22,7 +20,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
   final _openAreaController = TextEditingController();
   final _dwellersController = TextEditingController();
 
-  String? _roofMaterial = 'Concrete';
+  String _roofMaterial = 'Concrete';
   String _locationType = 'Urban';
   bool _isLoading = false;
 
@@ -36,9 +34,10 @@ class _UserInputScreenState extends State<UserInputScreen> {
     super.dispose();
   }
 
-
   Future<void> _submitForm() async {
-    if (!_validateInputs()) return;
+    // Get localizations before async gap
+    final localizations = AppLocalizations.of(context)!;
+    if (!_validateInputs(localizations)) return;
 
     setState(() {
       _isLoading = true;
@@ -48,13 +47,12 @@ class _UserInputScreenState extends State<UserInputScreen> {
       roofArea: double.parse(_roofAreaController.text.trim()),
       pincode: _pinCodeController.text.trim(),
       address: _addressController.text.trim(),
-      roofMaterial: _roofMaterial ?? 'Concrete',
+      roofMaterial: _roofMaterial,
       locationType: _locationType,
       openArea: double.parse(_openAreaController.text.trim()),
       dwellers: int.parse(_dwellersController.text.trim()),
     );
 
-    // Navigate to ReportScreen
     if (mounted) {
       Navigator.push(
         context,
@@ -64,7 +62,6 @@ class _UserInputScreenState extends State<UserInputScreen> {
       );
     }
 
-    // Set loading to false after navigation (in case user comes back)
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -72,56 +69,56 @@ class _UserInputScreenState extends State<UserInputScreen> {
     }
   }
 
-
-  bool _validateInputs() {
+  bool _validateInputs(AppLocalizations localizations) {
     if (_pinCodeController.text.trim().isEmpty) {
-      _showErrorDialog('Please enter PIN Code');
+      _showErrorDialog(localizations.validationEnterPincode);
       return false;
     }
     if (_pinCodeController.text.trim().length != 6) {
-      _showErrorDialog('PIN Code must be 6 digits');
+      _showErrorDialog(localizations.validationPincode6digits);
       return false;
     }
     if (_roofAreaController.text.trim().isEmpty) {
-      _showErrorDialog('Please enter roof area');
+      _showErrorDialog(localizations.validationEnterRoofArea);
       return false;
     }
     final roofArea = double.tryParse(_roofAreaController.text.trim());
     if (roofArea == null || roofArea <= 0) {
-      _showErrorDialog('Please enter a valid roof area');
+      _showErrorDialog(localizations.validationValidRoofArea);
       return false;
     }
     if (_openAreaController.text.trim().isEmpty) {
-      _showErrorDialog('Please enter open area');
+      _showErrorDialog(localizations.validationEnterOpenArea);
       return false;
     }
     final openArea = double.tryParse(_openAreaController.text.trim());
     if (openArea == null || openArea < 0) {
-      _showErrorDialog('Please enter a valid open area (can be 0)');
+      _showErrorDialog(localizations.validationValidOpenArea);
       return false;
     }
     if (_dwellersController.text.trim().isEmpty) {
-      _showErrorDialog('Please enter the number of dwellers');
+      _showErrorDialog(localizations.validationEnterDwellers);
       return false;
     }
     final dwellers = int.tryParse(_dwellersController.text.trim());
     if (dwellers == null || dwellers <= 0) {
-      _showErrorDialog('Please enter a valid number of dwellers');
+      _showErrorDialog(localizations.validationValidDwellers);
       return false;
     }
     return true;
   }
 
   void _showErrorDialog(String message) {
+    final localizations = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Error'),
+        title: Text(localizations.error),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(localizations.ok),
           ),
         ],
       ),
@@ -129,19 +126,21 @@ class _UserInputScreenState extends State<UserInputScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
-    _showInfoDialog('Location feature will be implemented soon!');
+    final localizations = AppLocalizations.of(context)!;
+    _showInfoDialog(localizations.locationFeatureSoon);
   }
 
   void _showInfoDialog(String message) {
+    final localizations = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Info'),
+        title: Text(localizations.infoDialogTitle),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(localizations.ok),
           ),
         ],
       ),
@@ -150,27 +149,37 @@ class _UserInputScreenState extends State<UserInputScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
+    // Map for dropdown items to handle translation
+    final Map<String, String> roofMaterialOptions = {
+      'Concrete': localizations.roofMaterialConcrete,
+      'Tin': localizations.roofMaterialTin,
+      'Tiles': localizations.roofMaterialTiles,
+      'Other': localizations.roofMaterialOther,
+    };
+
     final formSections = [
       _buildSectionCard(
-        title: 'Location',
+        title: localizations.location,
         children: [
-          _BuildTextField('PIN Code', _pinCodeController),
+          _BuildTextField(localizations.pincode, _pinCodeController),
           const SizedBox(height: 16),
-          _BuildTextField('Address', _addressController),
+          _BuildTextField(localizations.address, _addressController),
           const SizedBox(height: 16),
           _BuildStyledButton(
-            text: 'Use location',
+            text: localizations.useLocation,
             icon: Icons.location_on_outlined,
             onTap: _getCurrentLocation,
           ),
         ],
       ),
       _buildSectionCard(
-        title: 'Area Details',
+        title: localizations.areaDetails,
         children: [
-          _BuildTextField('Roof Area', _roofAreaController, suffixText: 'm²'),
+          _BuildTextField(localizations.roofArea, _roofAreaController, suffixText: 'm²'),
           const SizedBox(height: 16),
-          _BuildTextField('Open Area', _openAreaController, suffixText: 'm²'),
+          _BuildTextField(localizations.openArea, _openAreaController, suffixText: 'm²'),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
@@ -185,30 +194,30 @@ class _UserInputScreenState extends State<UserInputScreen> {
                 icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF012A4A)),
                 dropdownColor: Colors.blue.shade50.withOpacity(0.9),
                 onChanged: (String? newValue) =>
-                    setState(() => _roofMaterial = newValue),
-                items: <String>['Concrete', 'Tin', 'Tiles', 'Other']
-                    .map((String value) => DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value,
-                      style: const TextStyle(
-                          color: Color(0xFF012A4A),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500)),
-                ))
-                    .toList(),
+                    setState(() => _roofMaterial = newValue!),
+                items: roofMaterialOptions.entries.map((entry) {
+                  return DropdownMenuItem<String>(
+                    value: entry.key, // The English value
+                    child: Text(entry.value, // The translated value
+                        style: const TextStyle(
+                            color: Color(0xFF012A4A),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500)),
+                  );
+                }).toList(),
               ),
             ),
           ),
         ],
       ),
       _buildSectionCard(
-        title: 'Household Details',
+        title: localizations.householdDetails,
         children: [
-          _BuildTextField('No. of Dwellers', _dwellersController),
+          _BuildTextField(localizations.noOfDwellers, _dwellersController),
         ],
       ),
       _buildSectionCard(
-        title: 'Location Type',
+        title: localizations.locationType,
         children: [
           _buildToggleButtons(),
         ],
@@ -217,7 +226,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
         child: _isLoading
             ? const CircularProgressIndicator()
             : _BuildStyledButton(
-          text: 'SUBMIT',
+          text: localizations.submit,
           isSubmitButton: true,
           onTap: _submitForm,
         ),
@@ -259,7 +268,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
               end: Alignment.bottomRight,
             ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
             child: Text(
-              'USER INPUT',
+              localizations.userInputTitle,
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.5,
@@ -309,6 +318,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
   }
 
   Widget _buildToggleButtons() {
+    final localizations = AppLocalizations.of(context)!;
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth / 2;
@@ -352,7 +362,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
                         height: 50,
                         color: Colors.transparent,
                         child: Center(
-                          child: Text('Urban',
+                          child: Text(localizations.urban,
                               style: TextStyle(
                                   color: _locationType == 'Urban'
                                       ? Colors.white
@@ -373,7 +383,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
                         height: 50,
                         color: Colors.transparent,
                         child: Center(
-                          child: Text('Rural',
+                          child: Text(localizations.rural,
                               style: TextStyle(
                                   color: _locationType == 'Rural'
                                       ? Colors.white
@@ -461,9 +471,11 @@ class _BuildTextFieldState extends State<_BuildTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final isNumeric = widget.hintText.contains('PIN Code') ||
-        widget.hintText.contains('Area') ||
-        widget.hintText.contains('Dwellers');
+    final localizations = AppLocalizations.of(context)!;
+    final isNumeric = widget.hintText == localizations.pincode ||
+        widget.hintText == localizations.roofArea ||
+        widget.hintText == localizations.openArea ||
+        widget.hintText == localizations.noOfDwellers;
 
     return TweenAnimationBuilder<Decoration>(
       duration: const Duration(milliseconds: 300),

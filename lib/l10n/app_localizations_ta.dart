@@ -365,5 +365,5 @@ class AppLocalizationsTa extends AppLocalizations {
       'பாசி வளர்ச்சி மற்றும் கொசு இனப்பெருக்கத்தைத் தடுக்க தொட்டியை மூடி வைக்கவும்.';
 
   @override
-  String get bestStructure => 'Best Structure';
+  String get bestStructure => 'சிறந்த கட்டமைப்பு';
 }

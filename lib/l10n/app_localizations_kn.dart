@@ -364,5 +364,5 @@ class AppLocalizationsKn extends AppLocalizations {
       'ಪಾಚಿಗಳ ಬೆಳವಣಿಗೆ ಮತ್ತು ಸೊಳ್ಳೆಗಳ ಸಂತಾನೋತ್ಪತ್ತಿಯನ್ನು ತಡೆಯಲು ಟ್ಯಾಂಕ್ ಅನ್ನು ಮುಚ್ಚಿಡಿ.';
 
   @override
-  String get bestStructure => 'Best Structure';
+  String get bestStructure => 'ಅತ್ಯುತ್ತಮ ರಚನೆ';
 }

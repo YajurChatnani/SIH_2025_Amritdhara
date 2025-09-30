@@ -361,5 +361,5 @@ class AppLocalizationsBn extends AppLocalizations {
       'শৈবালের বৃদ্ধি এবং মশা প্রজনন রোধ করতে ট্যাঙ্কটি ঢেকে রাখুন।';
 
   @override
-  String get bestStructure => 'Best Structure';
+  String get bestStructure => 'শ্রেষ্ঠ কাঠামো';
 }

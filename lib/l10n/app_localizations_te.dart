@@ -363,5 +363,5 @@ class AppLocalizationsTe extends AppLocalizations {
       'ఆల్గే పెరుగుదల మరియు దోమల పునరుత్పత్తిని నివారించడానికి ట్యాంక్‌ను కప్పి ఉంచండి.';
 
   @override
-  String get bestStructure => 'Best Structure';
+  String get bestStructure => 'ఉత్తమ నిర్మాణం';
 }
