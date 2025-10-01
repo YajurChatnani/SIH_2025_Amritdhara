@@ -11,7 +11,6 @@ class StructureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-    // Get localizations object
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -37,7 +36,6 @@ class StructureScreen extends StatelessWidget {
             ),
           ),
         ),
-        // CHANGED
         title: Text(
           localizations.structureStepsTitle,
           style: GoogleFonts.poppins(
@@ -68,7 +66,7 @@ class StructureScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: EdgeInsets.only(
             top: kToolbarHeight + statusBarHeight + 20,
-            bottom: 100, // Padding for FAB
+            bottom: 100,
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -81,7 +79,6 @@ class StructureScreen extends StatelessWidget {
                 const SizedBox(height: 30),
                 _AnimatedFadeIn(
                   delay: 400,
-                  // CHANGED: Pass localizations
                   child: _buildInstructionsCard(context),
                 ),
               ],
@@ -93,37 +90,43 @@ class StructureScreen extends StatelessWidget {
   }
 
   Widget _buildVendorFab(BuildContext context) {
-    // ... (This widget from the previous step remains the same)
-    return FloatingActionButton.extended(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const VendorsScreen()),
-        );
-      },
-      backgroundColor: Colors.transparent,
-      elevation: 8.0,
-      label: Ink(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF42A5F5), Color(0xFF1976D2)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF012A4A).withOpacity(0.25),
+            blurRadius: 20,
+            spreadRadius: 2,
+            offset: const Offset(0, 8),
           ),
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        ],
+      ),
+      child: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const VendorsScreen()),
+          );
+        },
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        label: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFF012A4A),
+            borderRadius: BorderRadius.circular(30),
+          ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.storefront_outlined, color: Colors.white),
-              const SizedBox(width: 8),
+              const Icon(Icons.storefront_outlined, color: Colors.white, size: 22),
+              const SizedBox(width: 10),
               Text(
                 AppLocalizations.of(context)!.getVendor,
                 style: GoogleFonts.poppins(
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),
               ),
@@ -152,7 +155,6 @@ class StructureScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // CHANGED
               Text(
                 AppLocalizations.of(context)!.structureDiagram,
                 style: GoogleFonts.poppins(
@@ -235,7 +237,6 @@ class StructureScreen extends StatelessWidget {
   }
 
   Widget _buildInstructionsCard(BuildContext context) {
-    // Get localizations object
     final localizations = AppLocalizations.of(context)!;
 
     return ClipRRect(
@@ -252,7 +253,6 @@ class StructureScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // CHANGED
               Text(
                 localizations.stepByStepInstructions,
                 style: GoogleFonts.poppins(
@@ -262,7 +262,6 @@ class StructureScreen extends StatelessWidget {
                 ),
               ),
               const Divider(height: 24, thickness: 0.5),
-              // CHANGED: All steps now use translated text
               _buildInstructionStep(
                 number: '1.',
                 title: localizations.step1Title,
@@ -320,7 +319,6 @@ class StructureScreen extends StatelessWidget {
     required String title,
     required List<String> points,
   }) {
-    // ... (This widget remains the same as it receives translated text)
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: Column(
@@ -363,7 +361,6 @@ class StructureScreen extends StatelessWidget {
   }
 }
 
-// ... (ImageDetailScreen and _AnimatedFadeIn widgets remain the same)
 class ImageDetailScreen extends StatelessWidget {
   final String imageUrl;
   const ImageDetailScreen({super.key, required this.imageUrl});

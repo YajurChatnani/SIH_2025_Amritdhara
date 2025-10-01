@@ -154,7 +154,6 @@ class _ReportScreenState extends State<ReportScreen> {
 
       // Water Sustainability Card
       _InfoCard(
-        // MODIFIED: Changed to blue gradient
         gradient: blueGradient,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,7 +189,6 @@ class _ReportScreenState extends State<ReportScreen> {
 
       // Government Subsidy Card
       _InfoCard(
-        // MODIFIED: Changed to silver gradient
         gradient: silverGradient,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,7 +343,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
   Widget _buildFeasibilityRow(String structure, double score) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -356,7 +354,7 @@ class _ReportScreenState extends State<ReportScreen> {
                 color: Colors.black87,
                 fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _FeasibilityScale(score: score),
         ],
       ),
@@ -408,8 +406,6 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 }
-
-// ... _InfoCard and _AnimatedSection widgets remain the same ...
 
 class _InfoCard extends StatefulWidget {
   final Widget child;
@@ -499,7 +495,6 @@ class _AnimatedSectionState extends State<_AnimatedSection> {
   }
 }
 
-// FeasibilityScale widget with the corrected tooltip
 class _FeasibilityScale extends StatelessWidget {
   final double score;
 

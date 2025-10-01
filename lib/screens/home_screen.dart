@@ -154,8 +154,60 @@ class HomePage extends StatelessWidget {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(22.0),
-                      child: Image.asset('assets/images/map.png',
-                          fit: BoxFit.cover, height: 180, width: double.infinity),
+                      // ### MODIFICATION START ###
+                      child: Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          Image.asset(
+                            // Make sure you have an image at this path in your assets folder
+                            'assets/images/map.png',
+                            fit: BoxFit.cover,
+                            height: 180,
+                            width: double.infinity,
+                            // Add a fallback in case the image fails to load
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: 180,
+                                color: Colors.grey[300],
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.map_outlined,
+                                    color: Colors.grey,
+                                    size: 60,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          Container(
+                            margin: const EdgeInsets.all(12.0),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12.0, vertical: 8.0),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Tap to view',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(width: 8),
+                                Icon(
+                                  Icons.touch_app_outlined,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      // ### MODIFICATION END ###
                     ),
                   ),
                 ),
