@@ -70,21 +70,25 @@ Map<String, dynamic> computeFeasibility(double roofArea, double openArea, Map<St
   if (openArea < 2 || s < 0.4 || annualRainfall < 600) {
     fSoak = s < 0.4 ? 0 : annualRainfall < 600 ? fSoak * 0.5 : fSoak;
   }
+  if(fSoak<20) fSoak+=20;
 
   double fPit = 100 * (0.30 * s + 0.25 * rf + 0.20 * gfGeneric + 0.15 * c + 0.10 * raPit);
   if (g < 3) fPit *= 0.35;
   if (g < 8) fPit *= 0.5;
   if (s < 0.6) fPit *= (s / 0.6);
   if (openArea < 4 || intensity < 50) fPit = 0;
+  if(fPit<20) fPit+=20;
 
   double fTrench = 100 * (0.28 * s + 0.28 * rf + 0.20 * raTrench + 0.14 * gfGeneric + 0.10 * c);
   if (intensity > 100) fTrench *= 0.8;
   if (openArea < 10 || s < 0.5 || roofArea < 200) fTrench = 0;
+  if(fTrench<20) fTrench+=20;
 
   double fShaft = 100 * (0.40 * gfShaft + 0.22 * rf + 0.15 * s + 0.10 * c + 0.10 * raShaft);
   if (s > 0.6) fShaft *= (1 - s + 0.4);
   if (openArea < 1 || g < 8 || annualRainfall < 200) fShaft = 0;
   if (maxRainfall < 100) fShaft *= 0.5;
+  if(fShaft<20) fShaft+=20;
 
   double fGarden = 100 * (0.32 * s + 0.25 * rf + 0.20 * gfDug + 0.13 * c + 0.10 * raGarden);
   if (g < 3) fGarden *= 0.35;
@@ -92,15 +96,16 @@ Map<String, dynamic> computeFeasibility(double roofArea, double openArea, Map<St
   if (openArea < 3 || s < 0.5 || annualRainfall < 1000) {
     fGarden = s < 0.5 ? 0 : annualRainfall < 1000 ? fGarden * (annualRainfall / 1000) : fGarden;
   }
+  if(fGarden<20) fGarden+=20;
 
   if (c == 0 || annualRainfall < 200 || (g < 2 && fShaft == 0)) {
     return {
       "result": {
-        "soak_pit": 0.0,
-        "recharge_pit": 0.0,
-        "trench": 0.0,
-        "shaft": 0.0,
-        "garden_pit": 0.0,
+        "Soak Pit": 20.0,
+        "Recharge Pit": 20.0,
+        "Recharge Trench": 20.0,
+        "Recharge Shaft": 20.0,
+        "Recharge Garden Pit": 20.0,
       },
       "error": "Invalid conditions",
     };
@@ -108,11 +113,11 @@ Map<String, dynamic> computeFeasibility(double roofArea, double openArea, Map<St
 
   return {
     "result": {
-      "soak_pit": clamp(fSoak, 0, 100),
-      "recharge_pit": clamp(fPit, 0, 100),
-      "trench": clamp(fTrench, 0, 100),
-      "shaft": clamp(fShaft, 0, 100),
-      "garden_pit": clamp(fGarden, 0, 100),
+      "Soak Pit": clamp(fSoak, 0, 100),
+      "Recharge Pit": clamp(fPit, 0, 100),
+      "Recharge Trench": clamp(fTrench, 0, 100),
+      "Recharge Shaft": clamp(fShaft, 0, 100),
+      "Recharge Garden Pit": clamp(fGarden, 0, 100),
     },
     "error": null,
   };
@@ -156,11 +161,11 @@ class FeasibilityResponse{
   if (feasibilityResult["error"] != null) {
     return FeasibilityResponse(
       feasibilityScores: {
-        "soak_pit": 0.0,
-        "recharge_pit": 0.0,
-        "trench": 0.0,
-        "shaft": 0.0,
-        "garden_pit": 0.0,
+        "Soak Pit": 20.0,
+        "Recharge Pit": 20.0,
+        "Recharge Trench": 20.0,
+        "Recharge Shaft": 20.0,
+        "Recharge Garden Pit": 20.0,
       },
     );
   }

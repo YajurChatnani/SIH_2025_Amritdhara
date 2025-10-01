@@ -22,12 +22,17 @@ const Map<String, double> efficiencyCoefficients = {
 };
 
 // Cost estimates for each structure (low, high in INR)
+//"Soak Pit": 0.0,
+//         "Recharge Pit": 0.0,
+//         "Recharge Trench": 0.0,
+//         "Recharge Shaft": 0.0,
+//         "Recharge Garden Pit": 0.0,
 const Map<String, List<int>> structureCosts = {
-  'soak_pit': [1500, 4000],
-  'recharge_pit': [4000, 8000],
-  'trench': [8000, 16000],
-  'shaft': [12000, 25000],
-  'garden_pit': [4000, 12000],
+  "Soak Pit": [1500, 4000],
+  "Recharge Pit": [4000, 8000],
+  "Recharge Trench": [8000, 16000],
+  "Recharge Shaft": [12000, 25000],
+  "Recharge Garden Pit": [4000, 12000],
 };
 
 // Daily water consumption per person in liters (assumed for sustainability calculation, adjustable)
@@ -43,7 +48,7 @@ int calculateAnnualHarvestPotential(double roofArea, double annualRainfall, Stri
 
 // Get cost estimates for a given structure
 List<int> getCostEstimates(String structure) {
-  final String key = structure.toLowerCase();
+  final String key = structure;
   return structureCosts[key] ?? [0, 0];
 }
 
