@@ -366,4 +366,7 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get bestStructure => 'சிறந்த கட்டமைப்பு';
+
+  @override
+  String get messageWhatsApp => 'வாட்ஸ்அப்பில் செய்தி அனுப்பவும்';
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart'; // IMPORT ADDED
-
+import 'package:url_launcher/url_launcher.dart';
 // A simple data model for a vendor
 class Vendor {
   final String name;
@@ -156,6 +156,7 @@ class VendorsScreen extends StatelessWidget {
   }
 }
 
+
 class _VendorCard extends StatelessWidget {
   final Vendor vendor;
 
@@ -163,23 +164,23 @@ class _VendorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get localizations object for this widget
     final localizations = AppLocalizations.of(context)!;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12.0),
       decoration: BoxDecoration(
-          color: const Color(0xFFD7F8FA),
-          borderRadius: BorderRadius.circular(20.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              spreadRadius: 2,
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-          border: Border.all(color: Colors.white.withOpacity(0.5))),
+        color: const Color(0xFFD7F8FA),
+        borderRadius: BorderRadius.circular(20.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            spreadRadius: 2,
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+        border: Border.all(color: Colors.white.withOpacity(0.5)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -204,7 +205,7 @@ class _VendorCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    vendor.role, // This is now the translated role
+                    vendor.role,
                     style: GoogleFonts.poppins(
                       color: Colors.black54,
                       fontSize: 14,
@@ -212,50 +213,81 @@ class _VendorCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // CHANGED
                   Text(
                     '${localizations.mobileNo} ${vendor.mobile}',
-                    style:
-                    GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
+                    style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
                   ),
                   const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                  Text(
+                    '${localizations.addressLabel} ${vendor.address}',
+                    style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
-                      Expanded(
-                        // CHANGED
-                        child: Text(
-                          '${localizations.addressLabel} ${vendor.address}',
-                          style: GoogleFonts.poppins(
-                              fontSize: 14, color: Colors.black87),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
+                      // Call Now Button
                       Container(
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.red.withOpacity(0.4),
-                                  spreadRadius: 1,
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4))
-                            ]),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.red.withOpacity(0.4),
+                              spreadRadius: 1,
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            )
+                          ],
+                        ),
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            // TODO: Implement call functionality
+                            launchUrl(Uri.parse('tel:${vendor.mobile}'));
                           },
                           icon: const Icon(Icons.call, size: 16),
-                          // CHANGED
                           label: Text(localizations.callNow),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
                             shape: const StadiumBorder(),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          ),
+                        ),
+                      ),
+                      // WhatsApp Button
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF25D366), Color(0xFF128C7E)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.4),
+                              spreadRadius: 1,
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            )
+                          ],
+                        ),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            final whatsappUrl = Uri.parse(
+                                "https://wa.me/${vendor.mobile}?text=Hello%20${Uri.encodeComponent(vendor.name)},%20I%20would%20like%20to%20connect%20with%20you."
+                            );
+                            launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+                          },
+                          icon: const Icon(Icons.message, size: 16),
+                          label: Text(localizations.messageWhatsApp),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            shape: const StadiumBorder(),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            elevation: 0,
                           ),
                         ),
                       ),

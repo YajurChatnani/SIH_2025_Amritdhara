@@ -364,4 +364,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get bestStructure => 'ఉత్తమ నిర్మాణం';
+
+  @override
+  String get messageWhatsApp => 'వాట్సాప్ ద్వారా సందేశం పంపండి';
 }

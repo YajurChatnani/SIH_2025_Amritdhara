@@ -787,6 +787,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Best Structure'**
   String get bestStructure;
+
+  /// No description provided for @messageWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Message via WhatsApp'**
+  String get messageWhatsApp;
 }
 
 class _AppLocalizationsDelegate

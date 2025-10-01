@@ -364,4 +364,7 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get bestStructure => 'શ્રેષ્ઠ માળખું';
+
+  @override
+  String get messageWhatsApp => 'વોટ્સએપ દ્વારા સંદેશ મોકલો';
 }

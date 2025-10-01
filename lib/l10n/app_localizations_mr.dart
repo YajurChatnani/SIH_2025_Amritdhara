@@ -361,4 +361,7 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get bestStructure => 'सर्वोत्तम रचना';
+
+  @override
+  String get messageWhatsApp => 'व्हॉट्सअॅपद्वारे संदेश पाठवा';
 }

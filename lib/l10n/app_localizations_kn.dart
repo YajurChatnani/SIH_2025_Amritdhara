@@ -365,4 +365,7 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get bestStructure => 'ಅತ್ಯುತ್ತಮ ರಚನೆ';
+
+  @override
+  String get messageWhatsApp => 'ವಾಟ್ಸಾಪ್ ಮೂಲಕ ಸಂದೇಶ ಕಳುಹಿಸಿ';
 }

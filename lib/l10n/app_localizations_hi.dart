@@ -362,4 +362,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get bestStructure => 'सर्वोत्तम संरचना';
+
+  @override
+  String get messageWhatsApp => 'व्हाट्सएप के माध्यम से संदेश भेजें';
 }

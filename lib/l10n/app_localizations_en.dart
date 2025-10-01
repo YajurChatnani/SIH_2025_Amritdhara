@@ -363,4 +363,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bestStructure => 'Best Structure';
+
+  @override
+  String get messageWhatsApp => 'Message via WhatsApp';
 }
