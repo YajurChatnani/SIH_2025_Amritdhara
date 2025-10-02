@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../l10n/app_localizations.dart'; // IMPORT ADDED
 import 'package:url_launcher/url_launcher.dart';
+
 // A simple data model for a vendor
 class Vendor {
   final String name;
@@ -30,25 +31,25 @@ class VendorsScreen extends StatelessWidget {
       Vendor(
         name: 'Mr. Mohan Kumar',
         role: localizations.roleContractor, // Use translated role
-        mobile: '1234561246',
+        mobile: '+919009312222',
         address: 'J-45, Nehru Place, New Delhi',
       ),
       Vendor(
         name: 'Mr. Ramkamal',
         role: localizations.roleContractor, // Use translated role
-        mobile: '1234561246',
+        mobile: '+919109447974',
         address: 'B-112, Sector 5, Noida',
       ),
       Vendor(
         name: 'Mr. Rajat Singh',
         role: localizations.roleContractor, // Use translated role
-        mobile: '1234561246',
+        mobile: '+918821811285',
         address: 'D-2, Hauz Khas, New Delhi',
       ),
       Vendor(
         name: 'Mr. Suresh Patel',
         role: localizations.rolePlumber, // Use translated role
-        mobile: '9876543210',
+        mobile: '+919129785055',
         address: '15/A, Karol Bagh, New Delhi',
       ),
     ];
@@ -156,7 +157,6 @@ class VendorsScreen extends StatelessWidget {
   }
 }
 
-
 class _VendorCard extends StatelessWidget {
   final Vendor vendor;
 
@@ -215,12 +215,14 @@ class _VendorCard extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     '${localizations.mobileNo} ${vendor.mobile}',
-                    style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
+                    style: GoogleFonts.poppins(
+                        fontSize: 14, color: Colors.black87),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${localizations.addressLabel} ${vendor.address}',
-                    style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
+                    style: GoogleFonts.poppins(
+                        fontSize: 14, color: Colors.black87),
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 12),
@@ -251,7 +253,8 @@ class _VendorCard extends StatelessWidget {
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
                             shape: const StadiumBorder(),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10),
                           ),
                         ),
                       ),
@@ -276,9 +279,9 @@ class _VendorCard extends StatelessWidget {
                         child: ElevatedButton.icon(
                           onPressed: () {
                             final whatsappUrl = Uri.parse(
-                                "https://wa.me/${vendor.mobile}?text=Hello%20${Uri.encodeComponent(vendor.name)},%20I%20would%20like%20to%20connect%20with%20you."
-                            );
-                            launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+                                "https://wa.me/${vendor.mobile}?text=Hello%20${Uri.encodeComponent(vendor.name)},%20I%20would%20like%20to%20connect%20with%20you.");
+                            launchUrl(whatsappUrl,
+                                mode: LaunchMode.externalApplication);
                           },
                           icon: const Icon(Icons.message, size: 16),
                           label: Text(localizations.messageWhatsApp),
@@ -286,7 +289,8 @@ class _VendorCard extends StatelessWidget {
                             backgroundColor: Colors.transparent,
                             foregroundColor: Colors.white,
                             shape: const StadiumBorder(),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
                             elevation: 0,
                           ),
                         ),
