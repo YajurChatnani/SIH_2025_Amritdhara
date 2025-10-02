@@ -60,7 +60,7 @@ class StructureScreen extends StatelessWidget {
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            stops: [0.0, 0.5, 1.0],
+            stops: [0.1, 0.5, 1.0],
           ),
         ),
         child: SingleChildScrollView(
@@ -91,16 +91,18 @@ class StructureScreen extends StatelessWidget {
 
   Widget _buildVendorFab(BuildContext context) {
     return Container(
+      // The decoration with the shadow was here. It has been removed.
+      // The container is kept to maintain the widget structure.
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF012A4A).withOpacity(0.25),
-            blurRadius: 20,
-            spreadRadius: 2,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        // boxShadow: [ <--- THIS IS THE PART THAT WAS REMOVED
+        //   BoxShadow(
+        //     color: const Color(0xFF012A4A).withOpacity(0.25),
+        //     blurRadius: 20,
+        //     spreadRadius: 2,
+        //     offset: const Offset(0, 8),
+        //   ),
+        // ],
       ),
       child: FloatingActionButton.extended(
         onPressed: () {
